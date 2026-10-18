@@ -7,6 +7,7 @@ import { useSeller } from '@/hooks/useSeller'
 import { StatCard, PageLoader, EmptyState } from '@/components/ui'
 import { formatTZS, formatDate } from '@/utils'
 import { useDashboardStats } from '@/lib/query/hooks'
+import { createClient } from '@/lib/supabase/client'
 import { DismissibleAlert } from '@/components/shared/DismissibleAlert'
 
 interface Alert {
@@ -23,6 +24,7 @@ export default function SellerDashboardPage() {
   const [alerts, setAlerts] = useState<Array<{ id: string; type: 'warning' | 'info' | 'success'; message: string; action?: () => void; actionLabel?: string }>>([])
   const [notifications, setNotifications] = useState(5)
   const [walletBalance, setWalletBalance] = useState(0)
+  const [notifCount, setNotifCount] = useState(0)
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set())
   const [showContent, setShowContent] = useState(false)
 
@@ -82,6 +84,24 @@ export default function SellerDashboardPage() {
     setAlerts(newAlerts.filter(a => !dismissedAlerts.has(a.id)))
   }, [stats, dismissedAlerts])
 
+  useEffect(() => {
+  if (!seller) return
+  ;(async () => {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('is_read', false)
+      setNotifCount(count ?? 0)
+    } catch {
+      // Silent fail
+    }
+  })()
+}, [seller])
   const handleDismissAlert = (id: string) => {
     setDismissedAlerts(prev => new Set([...prev, id]))
   }
@@ -108,7 +128,14 @@ export default function SellerDashboardPage() {
       </div>
     )
   }
-
+<Link href="/seller/notifications" className="relative p-2 rounded-xl bg-ink-100 dark:bg-ink-800 text-ink-600 dark:text-ink-300 hover:bg-ink-200 dark:hover:bg-ink-700 transition-colors">
+  <Bell className="w-5 h-5" />
+  {notifCount > 0 && (
+    <span className="absolute -top-1 -right-1 w-4 h-4 bg-brand-500 text-white text-xs rounded-full flex items-center justify-center">
+      {notifCount}
+    </span>
+  )}
+</Link>
   if (seller?.status === 'pending') {
     return (
       <div className="p-6 max-w-lg mx-auto dark:bg-ink-950 min-h-screen">
