@@ -28,7 +28,9 @@ export function useMarketplaceProducts(filters: MarketplaceProductFilters = {}) 
 
   const { category, search, madeInZanzibar, sort = 'newest', page = 1, pageSize = 20 } = filters
 
-  const fetch = useCallback(async () => {
+  // NOTE: must not be named `fetch` - that shadows the global fetch() and makes
+  // the request below recurse into itself (stack overflow -> undefined response).
+  const fetchProducts = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -77,8 +79,8 @@ export function useMarketplaceProducts(filters: MarketplaceProductFilters = {}) 
     }
   }, [category, search, madeInZanzibar, sort, page, pageSize])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { fetchProducts() }, [fetchProducts])
 
-  return { products, count, loading, error, refetch: fetch, totalPages: Math.ceil(count / pageSize) }
+  return { products, count, loading, error, refetch: fetchProducts, totalPages: Math.ceil(count / pageSize) }
 }
 

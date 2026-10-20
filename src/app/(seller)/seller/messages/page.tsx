@@ -54,7 +54,7 @@ export default function SellerMessagesPage() {
     try {
       const { data: roomRows, error: roomError } = await supabase
         .from('chat_rooms')
-        .select('id, buyer_id, buyer:profiles(full_name, avatar_url)')
+        .select('id, buyer_id, buyer:profiles!buyer_id(full_name, avatar_url)')
         .eq('seller_id', seller!.id)
 
       if (roomError) throw roomError

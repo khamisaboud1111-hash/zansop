@@ -105,12 +105,13 @@ export function useChat(options: UseChatOptions) {
       } else {
         // Create room using appropriate RPC
         let rpcName = ''
-        let rpcParams: Record<string, string> = {}
+        let rpcParams: Record<string, string | null> = {}
 
         switch (participantType) {
           case 'buyer_seller':
             rpcName = 'create_buyer_seller_room'
-            rpcParams = { p_buyer_id: buyerId!, p_seller_id: sellerId!, p_product_id: productId ?? '' }
+            // null, not '' - p_product_id is a uuid and '' fails the cast.
+            rpcParams = { p_buyer_id: buyerId!, p_seller_id: sellerId!, p_product_id: productId ?? null }
             break
           case 'buyer_rider':
             rpcName = 'create_buyer_rider_room'
@@ -140,8 +141,7 @@ export function useChat(options: UseChatOptions) {
             seller:sellers!seller_id(store_name, store_slug, logo_url),
             buyer:profiles!buyer_id(full_name, avatar_url),
             rider:profiles!rider_id(full_name, avatar_url),
-            product:products!product_id(name),
-            product_image:product_images!product_id(url, is_primary)
+            product:products!product_id(name, images:product_images(url, is_primary))
           `)
           .eq('id', roomId)
           .single()
@@ -254,7 +254,7 @@ export function useChat(options: UseChatOptions) {
       rider_id: data.rider_id,
       product_id: data.product_id,
       product_name: data.product?.name,
-      product_image: data.product_image?.find((pi: any) => pi.is_primary)?.url,
+      product_image: data.product?.images?.find((pi: any) => pi.is_primary)?.url,
       seller_name: data.seller?.store_name,
       seller_slug: data.seller?.store_slug,
       seller_logo: data.seller?.logo_url,
