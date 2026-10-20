@@ -11,6 +11,11 @@ export function useNotifications() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const mountedRef = useRef(true)
+  // Supabase channels are keyed by name. The navbar and the notifications
+  // page both mount this hook, so a fixed name makes the second mount reuse
+  // the already-subscribed channel and Supabase throws
+  // "cannot add postgres_changes callbacks ... after subscribe()".
+  const instanceId = useMemo(() => Math.random().toString(36).slice(2, 10), [])
 
   const fetch = useCallback(async () => {
     if (!mountedRef.current) return
@@ -63,7 +68,7 @@ export function useNotifications() {
         await fetch()
 
         channel = supabase
-          .channel(`notifications-${user.id}`)
+          .channel(`notifications-${instanceId}-${user.id}`)
           .on('postgres_changes', {
             event: 'INSERT',
             schema: 'public',
@@ -92,7 +97,7 @@ export function useNotifications() {
       cancelled = true
       if (channel) supabase.removeChannel(channel)
     }
-  }, [fetch, supabase])
+  }, [fetch, supabase, instanceId])
 
   async function markRead(id: string) {
     try {
