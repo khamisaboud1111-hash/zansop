@@ -189,6 +189,12 @@ export function useChat(options: UseChatOptions) {
     }
   }
 
+  // Append a message, ignoring one we already have. The sender's own message
+  // arrives twice: once from the optimistic insert and once from realtime.
+  const appendMessage = useCallback((msg: ChatMessage) => {
+    setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]))
+  }, [])
+
   // Realtime: new messages in this room
   useEffect(() => {
     if (!room?.id) return
@@ -200,10 +206,10 @@ export function useChat(options: UseChatOptions) {
         { event: 'INSERT', schema: 'public', table: 'messages', filter: `room_id=eq.${room.id}` },
         (payload) => {
           const newMsg = payload.new as ChatMessage
-          setMessages((prev) => [...prev, {
+          appendMessage({
             ...newMsg,
             is_own: newMsg.sender_id === (buyerId || sellerId || riderId)
-          }])
+          })
         }
       )
       .subscribe()
@@ -211,7 +217,7 @@ export function useChat(options: UseChatOptions) {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [room?.id, supabase, buyerId, sellerId, riderId])
+  }, [room?.id, supabase, buyerId, sellerId, riderId, appendMessage])
 
   // Realtime: room updates (last_message_at, unread_count)
   useEffect(() => {
@@ -294,21 +300,41 @@ export function useChat(options: UseChatOptions) {
       if (!room || !body.trim()) return false
       setSending(true)
       try {
-        const { error } = await supabase.rpc('send_message', {
+        const { data, error } = await supabase.rpc('send_message', {
           p_room_id: room.id,
           p_body: body.trim(),
           p_message_type: messageType,
           p_attachment_url: attachmentUrl ?? null
         })
         setSending(false)
-        return !error
+        if (error) {
+          console.error('[useChat] sendMessage error:', error)
+          return false
+        }
+        // Show the message straight away instead of waiting for the realtime
+        // socket, which may be slow or blocked.
+        const sent = (Array.isArray(data) ? data[0] : data) as ChatMessage | undefined
+        if (sent?.id) {
+          appendMessage({
+            id: sent.id,
+            room_id: sent.room_id ?? room.id,
+            sender_id: sent.sender_id ?? senderId,
+            body: sent.body ?? body.trim(),
+            message_type: sent.message_type ?? messageType,
+            attachment_url: sent.attachment_url ?? attachmentUrl ?? null,
+            read_at: null,
+            created_at: sent.created_at ?? new Date().toISOString(),
+            is_own: true,
+          })
+        }
+        return true
       } catch (error) {
         console.error('[useChat] sendMessage error:', error)
         setSending(false)
         return false
       }
     },
-    [room, supabase, buyerId, sellerId, riderId]
+    [room, supabase, buyerId, sellerId, riderId, appendMessage]
   )
 
   const markRead = useCallback(

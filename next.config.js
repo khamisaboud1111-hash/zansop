@@ -45,7 +45,11 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org https://server.arcgisonline.com",
-              "connect-src 'self' https://*.supabase.co https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org https://server.arcgisonline.com",
+              // wss:// is a separate scheme from https:// in CSP - the Supabase
+              // realtime socket is wss://*.supabase.co and is NOT covered by
+              // https://*.supabase.co. Without it every realtime subscription
+              // (chat messages, notifications) is blocked by the browser.
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org https://server.arcgisonline.com",
               "frame-ancestors 'none'",
             ].join('; '),
           },
