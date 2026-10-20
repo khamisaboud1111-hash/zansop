@@ -193,7 +193,7 @@ export default function Sidebar() {
             >
               <div className="flex items-center justify-between px-4 h-16 border-b border-ink-100 dark:border-ink-800">
                 <span className="font-display font-black text-xl tracking-tight bg-gradient-to-r from-orange-600 via-amber-500 to-yellow-500 bg-clip-text text-transparent">
-                  DUKA JANJA
+                  Zanshop
                 </span>
                 <button
                   onClick={() => setOpen(false)}
@@ -253,3 +253,4 @@ export default function Sidebar() {
     </>
   )
 }
+

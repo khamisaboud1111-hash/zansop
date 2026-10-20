@@ -113,3 +113,4 @@ export default function LanguageSwitcher({ variant = 'pill' }: { variant?: 'pill
     </div>
   )
 }
+

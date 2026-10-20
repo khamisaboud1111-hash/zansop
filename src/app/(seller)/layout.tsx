@@ -3,7 +3,7 @@
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import Link from 'next/link'
-import { LayoutDashboard, Package, ShoppingBag, BarChart2, Settings, ArrowLeft, ShieldCheck, MessageCircle } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingBag, BarChart2, Settings, ArrowLeft, ShieldCheck, MessageCircle, Bell } from 'lucide-react'
 import { useUser } from '@/hooks/useUser'
 import { useSeller } from '@/hooks/useSeller'
 import { PageLoader } from '@/components/ui'
@@ -15,6 +15,7 @@ const NAV = [
   { href: '/seller/products',   label: 'Bidhaa',    icon: Package },
   { href: '/seller/orders',     label: 'Maagizo',   icon: ShoppingBag },
   { href: '/seller/messages',   label: 'Ujumbe',    icon: MessageCircle },
+  { href: '/seller/notifications', label: 'Uzoefu', icon: Bell },
   { href: '/seller/analytics',  label: 'Takwimu',   icon: BarChart2 },
   { href: '/seller/verification', label: 'Uthibitisho', icon: ShieldCheck },
   { href: '/seller/settings',   label: 'Mipangilio',icon: Settings },
@@ -29,13 +30,6 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
   const isDashboardPage = pathname === '/seller/dashboard'
   const { profile, loading } = useUser()
   const { seller, loading: sellerLoading, refetch } = useSeller()
-
-  // Refetch seller when navigating to dashboard to handle fresh store creation
-  useEffect(() => {
-    if (isDashboardPage && !sellerLoading) {
-      refetch()
-    }
-  }, [isDashboardPage, sellerLoading, refetch])
 
   if (loading || sellerLoading) return <PageLoader />
 
@@ -129,3 +123,4 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
     </div>
   )
 }
+

@@ -35,3 +35,4 @@ export const mpesaAdapter: PaymentProviderAdapter = {
     throw new Error('M-Pesa callback handling not yet implemented.')
   },
 }
+

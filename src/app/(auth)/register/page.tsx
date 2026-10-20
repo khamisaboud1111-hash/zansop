@@ -15,3 +15,4 @@ export default function RegisterRedirect({
   }
   redirect(`/onboarding?${params.toString()}`)
 }
+

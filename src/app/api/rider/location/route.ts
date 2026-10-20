@@ -35,3 +35,4 @@ export const POST = withValidation(updateLocationSchema, async (data) => {
 
   return NextResponse.json({ success: true })
 })
+

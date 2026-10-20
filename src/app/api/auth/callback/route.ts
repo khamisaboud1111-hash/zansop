@@ -36,3 +36,4 @@ export async function GET(req: NextRequest) {
 function encodeRedirect(next: string) {
   return next === DEFAULT_REDIRECT ? '' : `&redirect=${encodeURIComponent(next)}`
 }
+

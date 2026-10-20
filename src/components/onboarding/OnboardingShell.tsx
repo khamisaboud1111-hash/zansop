@@ -74,7 +74,7 @@ export default function OnboardingShell({ children }: { children: React.ReactNod
 
         {/* ── Header ───────────────────────────────────────────────────── */}
         <header className="relative z-10 flex items-center justify-between px-5 py-4 sm:px-8">
-          <Link href="/" className="flex items-center gap-2.5" aria-label="Duka Janja home">
+          <Link href="/" className="flex items-center gap-2.5" aria-label="Zanshop home">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-400 to-cyan-500 font-display text-sm font-black text-white shadow-glow-brand">
               DJ
             </span>
@@ -107,9 +107,11 @@ export default function OnboardingShell({ children }: { children: React.ReactNod
 
         {/* ── Footer ───────────────────────────────────────────────────── */}
         <footer className="relative z-10 pb-6 pt-2 text-center text-xs text-white/40">
-          © {new Date().getFullYear()} Duka Janja · Zanzibar, Tanzania
+          © {new Date().getFullYear()} Zanshop · Zanzibar, Tanzania
         </footer>
       </div>
     </MotionConfig>
   )
 }
+
+

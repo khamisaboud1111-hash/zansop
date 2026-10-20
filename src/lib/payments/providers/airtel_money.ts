@@ -35,3 +35,4 @@ export const airtelMoneyAdapter: PaymentProviderAdapter = {
     throw new Error('Airtel Money callback handling not yet implemented.')
   },
 }
+

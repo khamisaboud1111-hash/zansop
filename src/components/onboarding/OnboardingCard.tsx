@@ -540,3 +540,4 @@ export default function OnboardingCard({ initialMode = 'signup', initialType }: 
     </motion.div>
   )
 }
+

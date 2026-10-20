@@ -15,3 +15,4 @@ export default function KikoiStripe({ className = '' }: { className?: string }) 
     </div>
   )
 }
+

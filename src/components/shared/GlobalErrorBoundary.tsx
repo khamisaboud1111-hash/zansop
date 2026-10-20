@@ -78,3 +78,4 @@ export class GlobalErrorBoundary extends Component<Props, State> {
 export default function withGlobalErrorBoundary(children: ReactNode) {
   return <GlobalErrorBoundary>{children}</GlobalErrorBoundary>
 }
+

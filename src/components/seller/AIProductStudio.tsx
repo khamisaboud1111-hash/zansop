@@ -103,11 +103,11 @@ export default function AIProductStudio() {
 
     // Mock AI Generation Engine Output
     setResult({
-      titleEn: `${rawTitle} | Premium Quality Certified - Duka Janja`,
-      titleSw: `${rawTitle} | Ubora Uliothibitishwa - Duka Janja`,
+      titleEn: `${rawTitle} | Premium Quality Certified - Zanshop`,
+      titleSw: `${rawTitle} | Ubora Uliothibitishwa - Zanshop`,
       shortDescription: `Experience superior craftsmanship with our ${rawTitle}. Sourced locally in Zanzibar and verified for durability and comfort.`,
       longDescription: `Elevate your lifestyle with our exceptional ${rawTitle}. Expertly crafted to withstand everyday use while maintaining a sleek, modern aesthetic. Perfect for customers looking for authentic East African quality, reliable daily performance, and unmatched elegance. Available for fast dispatch across Zanzibar, Dar es Salaam, and the wider region.`,
-      seoTitle: `Buy Best ${rawTitle} Online in Zanzibar & Tanzania | Duka Janja`,
+      seoTitle: `Buy Best ${rawTitle} Online in Zanzibar & Tanzania | Zanshop`,
       seoDescription: `Order authentic ${rawTitle} at the best price in Zanzibar. Fast delivery, secure mobile money checkout, and verified local quality.`,
       bulletFeatures: [
         "100% Genuine Certified Quality",
@@ -116,8 +116,8 @@ export default function AIProductStudio() {
         "Sourced and verified directly from trusted East African artisans",
         "Eco-friendly and sustainable packaging"
       ],
-      keywords: [rawTitle.toLowerCase(), "zanzibar marketplace", "duka janja certified", "east africa shopping", "tanzania online store"],
-      hashtags: ["#DukaJanja", "#ZanzibarShopping", "#BuyLocal", "#TanzaniaECommerce", "#QualityCertified"],
+      keywords: [rawTitle.toLowerCase(), "zanzibar marketplace", "Zanshop certified", "east africa shopping", "tanzania online store"],
+      hashtags: ["#zanshop", "#ZanzibarShopping", "#BuyLocal", "#TanzaniaECommerce", "#QualityCertified"],
       suggestedPriceTZS: {
         avgMarket: 45000,
         recommended: 42000,
@@ -152,7 +152,7 @@ export default function AIProductStudio() {
         </div>
         <div>
           <h3 className="text-xl font-black tracking-tight">AI Seller Studio</h3>
-          <p className="text-xs text-muted-foreground">Instantly generate complete, localized product listings for Duka Janja</p>
+          <p className="text-xs text-muted-foreground">Instantly generate complete, localized product listings for Zanshop</p>
         </div>
       </div>
 
@@ -372,3 +372,5 @@ export default function AIProductStudio() {
     </div>
   );
 }
+
+

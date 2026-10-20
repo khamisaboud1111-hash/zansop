@@ -3,10 +3,10 @@ import { MapPin, Mail, Send } from "lucide-react";
 
 export default function Footer() {
   const socialLinks = [
-    { icon: "📘", href: "https://facebook.com/dukajanja", label: "Facebook" },
-    { icon: "📷", href: "https://instagram.com/dukajanja", label: "Instagram" },
-    { icon: "🐦", href: "https://twitter.com/dukajanja", label: "Twitter" },
-    { icon: "💼", href: "https://linkedin.com/company/dukajanja", label: "LinkedIn" },
+    { icon: "📘", href: "https://facebook.com/zanshop", label: "Facebook" },
+    { icon: "📷", href: "https://instagram.com/zanshop", label: "Instagram" },
+    { icon: "🐦", href: "https://twitter.com/zanshop", label: "Twitter" },
+    { icon: "💼", href: "https://linkedin.com/company/zanshop", label: "LinkedIn" },
   ];
 
   const footerLinks = [
@@ -48,7 +48,7 @@ export default function Footer() {
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-500 via-brand-400 to-amber-400 flex items-center justify-center shadow-lg">
                 <span className="text-white font-black text-sm">DJ</span>
               </div>
-              <span className="font-display font-black text-xl text-ink-900 dark:text-white">Duka Janja</span>
+              <span className="font-display font-black text-xl text-ink-900 dark:text-white">Zanshop</span>
             </div>
             <p className="text-sm text-ink-500 dark:text-ink-400 max-w-xs">
               Your trusted marketplace in Zanzibar
@@ -122,7 +122,7 @@ export default function Footer() {
                 </div>
                 <div className="flex items-start gap-3">
                   <Mail className="w-4 h-4 text-brand-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-ink-600 dark:text-ink-300">info@dukajanja.co.tz</span>
+                  <span className="text-ink-600 dark:text-ink-300">info@zanshop.co.tz</span>
                 </div>
               </div>
             </div>
@@ -131,7 +131,7 @@ export default function Footer() {
 
         <div className="border-t border-ink-200 dark:border-ink-800 mt-10 pt-6 flex flex-col sm:flex-row justify-between gap-4 text-xs text-ink-500 dark:text-ink-400">
           <span>
-            &copy; {new Date().getFullYear()} Duka Janja. All rights reserved.
+            &copy; {new Date().getFullYear()} Zanshop. All rights reserved.
           </span>
           <span className="sm:text-right">Zanzibar, Tanzania</span>
         </div>
@@ -139,3 +139,4 @@ export default function Footer() {
     </footer>
   );
 }
+

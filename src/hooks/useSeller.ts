@@ -11,17 +11,22 @@ export function useSeller() {
 
   const fetch = useCallback(async () => {
     setLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setLoading(false); return }
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setLoading(false); return }
 
-    const { data } = await supabase
-      .from('sellers')
-      .select('*, profile:profiles(*)')
-      .eq('user_id', user.id)
-      .single()
+      const { data } = await supabase
+        .from('sellers')
+        .select('*, profile:profiles(*)')
+        .eq('user_id', user.id)
+        .single()
 
-    setSeller(data)
-    setLoading(false)
+      setSeller(data)
+    } catch (err) {
+      console.error('useSeller fetch error:', err)
+    } finally {
+      setLoading(false)
+    }
   }, [supabase])
 
   useEffect(() => { fetch() }, [fetch])
@@ -102,3 +107,4 @@ export function useSellerAnalytics(sellerId: string | null) {
 
   return { analytics, loading }
 }
+

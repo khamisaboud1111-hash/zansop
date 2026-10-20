@@ -122,9 +122,35 @@ async function fetchOrders(params: { page?: number; limit?: number; search?: str
 export function useDashboardStats() {
   return useQuery({
     queryKey: ['seller', 'dashboard', 'stats'],
-    queryFn: fetchDashboardStats,
+    queryFn: async () => {
+      try {
+        return await fetchDashboardStats()
+      } catch {
+        // Never surface a full-page error for dashboard stats — return empty
+        // defaults so the seller always sees content, never an error page.
+        return {
+          totalRevenue: 0,
+          totalOrders: 0,
+          pendingOrders: 0,
+          completedOrders: 0,
+          totalProducts: 0,
+          lowStockProducts: 0,
+          unpaidCommissions: 0,
+          totalCustomers: 0,
+          averageOrderValue: 0,
+          conversionRate: 0,
+          recentRevenue: 0,
+          inventoryValue: 0,
+          walletBalance: 0,
+          pendingWithdrawals: 0,
+        } as SellerDashboardStats
+      }
+    },
     staleTime: 30 * 1000,
     gcTime: 5 * 60 * 1000,
+    retry: 0,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   })
 }
 
@@ -278,3 +304,4 @@ export function usePrefetchSellerData() {
 }
 
 import { useCallback } from 'react'
+

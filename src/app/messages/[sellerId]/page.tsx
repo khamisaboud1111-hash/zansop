@@ -22,7 +22,7 @@ export default function BuyerMessagePage() {
   const [storeName, setStoreName] = useState('')
   const [loadingStore, setLoadingStore] = useState(true)
 
-  const { messages, loading, sending, sendMessage, markRead } = useChat(profile?.id, params.sellerId)
+  const { messages, loading, sending, sendMessage, markRead } = useChat({ buyerId: profile?.id, sellerId: params.sellerId, participantType: 'buyer_seller' })
 
   useEffect(() => {
     supabase

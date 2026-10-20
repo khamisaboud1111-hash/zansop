@@ -26,7 +26,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center">
               <span className="text-white font-black text-sm">DJ</span>
             </div>
-            <span className="font-display font-black text-brand-300 text-xl">Duka Janja</span>
+            <span className="font-display font-black text-brand-300 text-xl">Zanshop</span>
           </Link>
           <div className="flex items-center gap-2">
             <button
@@ -44,8 +44,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         {children}
       </main>
       <footer className="p-4 text-center text-xs text-ink-500">
-        © {new Date().getFullYear()} Duka Janja · Zanzibar, Tanzania
+        © {new Date().getFullYear()} Zanshop · Zanzibar, Tanzania
       </footer>
     </div>
   )
 }
+
+

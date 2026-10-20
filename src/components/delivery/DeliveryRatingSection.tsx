@@ -18,7 +18,7 @@ interface DeliveryInfo {
 
 /**
  * Drop this into the buyer's order page or the seller's orders list. It looks
- * up whether this order has a delivered Duka Janja delivery, whether the
+ * up whether this order has a delivered Zanshop delivery, whether the
  * current viewer already reviewed it, and renders the rating form (or the
  * already-submitted state) accordingly. Renders nothing if there's no
  * delivered delivery for this order yet (e.g. cash pickup, or still in transit).
@@ -81,3 +81,5 @@ export default function DeliveryRatingSection({ orderId, reviewerId, reviewerRol
     />
   )
 }
+
+

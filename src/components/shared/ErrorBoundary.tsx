@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState, Component, ReactNode } from 'react'
+import { useEffect, useState, Component, ReactNode } from 'react'
+
 import { ErrorState } from '@/components/shared/ErrorState'
 
 interface Props {
@@ -53,3 +54,4 @@ export class ErrorBoundary extends Component<Props, State> {
 export default function withErrorBoundary(children: ReactNode) {
   return <ErrorBoundary>{children}</ErrorBoundary>
 }
+

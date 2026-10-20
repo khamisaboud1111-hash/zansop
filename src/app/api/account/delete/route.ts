@@ -25,3 +25,4 @@ export async function POST(req: NextRequest) {
   // which in turn cascades to sellers, rider_profiles, wishlists, etc.
   return NextResponse.json({ data: { deleted: true }, error: null })
 }
+

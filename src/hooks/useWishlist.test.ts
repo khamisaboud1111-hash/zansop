@@ -81,3 +81,4 @@ describe('useWishlist', () => {
     expect(result.current.isWishlisted).toBe(false)
   })
 })
+

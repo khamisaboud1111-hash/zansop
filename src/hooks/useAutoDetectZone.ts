@@ -68,3 +68,4 @@ export function useAutoDetectZone() {
 
   return { detecting, error, coords, detect, nearestZone }
 }
+

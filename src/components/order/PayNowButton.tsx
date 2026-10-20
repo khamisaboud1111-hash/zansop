@@ -38,3 +38,4 @@ export default function PayNowButton({ orderId }: { orderId: string }) {
     </button>
   )
 }
+

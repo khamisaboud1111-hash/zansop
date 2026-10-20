@@ -77,3 +77,4 @@ export function ProductStatusBadge({ status }: { status: string }) {
   const key = labelKey[status]
   return <Badge variant={map[status] ?? 'gray'}>{key ? t(key, lang) : status}</Badge>
 }
+

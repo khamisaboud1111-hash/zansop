@@ -120,3 +120,4 @@ function relativeTime(iso: string, lang: 'en' | 'sw' | 'ar' | 'fr'): string {
   if (days < 7) return lang === 'sw' ? `siku ${days}` : `${days}d`
   return new Date(iso).toLocaleDateString(lang === 'sw' ? 'sw-TZ' : 'en', { day: 'numeric', month: 'short' })
 }
+

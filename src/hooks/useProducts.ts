@@ -83,3 +83,4 @@ export function useProducts(filters: ProductFilters = {}) {
 
   return { products, count, loading, error, refetch: fetch, totalPages: Math.ceil(count / pageSize) }
 }
+

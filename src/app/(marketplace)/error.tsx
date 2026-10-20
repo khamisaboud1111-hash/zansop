@@ -1,9 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { ErrorState } from '@/components/shared/ErrorState'
-import { useLangStore } from '@/store'
-import { t } from '@/i18n/translations'
 
 export default function MarketplaceError({
   error,
@@ -15,8 +13,6 @@ export default function MarketplaceError({
   useEffect(() => {
     console.error('Marketplace error:', error)
   }, [error])
-
-  const lang = useLangStore.getState().lang
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-white to-ink-50 dark:from-ink-950 dark:to-ink-900">
@@ -36,3 +32,4 @@ export default function MarketplaceError({
     </div>
   )
 }
+

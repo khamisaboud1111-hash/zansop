@@ -58,3 +58,4 @@ describe('DELIVERY_ZONES stays in sync with the database migration', () => {
     }
   })
 })
+

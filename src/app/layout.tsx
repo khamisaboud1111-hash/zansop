@@ -33,10 +33,10 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteOrigin()),
-  applicationName: 'Duka Janja',
-  authors: [{ name: 'Duka Janja Team' }],
-  creator: 'Duka Janja',
-  publisher: 'Duka Janja',
+  applicationName: 'Zanshop',
+  authors: [{ name: 'Zanshop Team' }],
+  creator: 'Zanshop',
+  publisher: 'Zanshop',
   robots: {
     index: true,
     follow: true,
@@ -46,15 +46,15 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   title: {
-    default: 'Duka Janja - Soko Kuu la Mtandaoni Zanzibar na Tanzania',
-    template: '%s | Duka Janja',
+    default: 'Zanshop - Soko Kuu la Mtandaoni Zanzibar na Tanzania',
+    template: '%s | Zanshop',
   },
   description: 'Nunua na uuze bidhaa za mtandaoni kama vifaa vya umeme, mitindo, vyakula, samani na bidhaa za urembo kote Zanzibar na Tanzania kwa malipo salama na usafirishaji wa haraka.',
   openGraph: {
-    title: 'Duka Janja - Soko Kuu la Mtandaoni Zanzibar na Tanzania',
+    title: 'Zanshop - Soko Kuu la Mtandaoni Zanzibar na Tanzania',
     description: 'Buy electronics, fashion, groceries, furniture, beauty products and more across Zanzibar and Tanzania with secure payments and fast delivery.',
     url: getSiteOrigin(),
-    siteName: 'Duka Janja',
+    siteName: 'Zanshop',
     locale: 'sw_TZ',
     type: 'website',
     images: [
@@ -62,20 +62,20 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Duka Janja Marketplace',
+        alt: 'Zanshop Marketplace',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Duka Janja - Zanzibar Marketplace',
+    title: 'Zanshop - Zanzibar Marketplace',
     description: 'Soko la kuaminika Zanzibar na Tanzania.',
     images: ['/og-image.png'],
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Duka Janja',
+    title: 'Zanshop',
   },
 }
 
@@ -96,7 +96,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "Duka Janja",
+    "name": "Zanshop",
     "url": getSiteOrigin(),
     "potentialAction": {
       "@type": "SearchAction",
@@ -170,3 +170,5 @@ export default function RootLayout({ children }: RootLayoutProps) {
     </html>
   )
 }
+
+

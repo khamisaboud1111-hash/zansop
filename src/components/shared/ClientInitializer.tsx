@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useLangStore } from '@/store'
-import { useThemeStore } from '@/store'
+import { useStores } from '@/store'
 import type { Language, Theme } from '@/store'
 
 // ─── Early error capture (runs at module import, before React hydrates) ──────
@@ -105,8 +104,8 @@ function applyTheme(theme: Theme) {
 }
 
 export function ClientInitializer() {
-  const langStore = useLangStore()
-  const themeStore = useThemeStore()
+  const langStore = useStores().useLangStore
+  const themeStore = useStores().useThemeStore
 
   // Sync from cookies after hydration
   useEffect(() => {
@@ -122,3 +121,4 @@ export function ClientInitializer() {
 
   return null
 }
+

@@ -561,3 +561,4 @@ function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }
     </motion.span>
   )
 }
+

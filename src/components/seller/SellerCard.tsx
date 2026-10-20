@@ -138,3 +138,4 @@ export default function SellerCard({ seller }: SellerCardProps) {
     </div>
   )
 }
+

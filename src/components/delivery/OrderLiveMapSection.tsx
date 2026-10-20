@@ -19,7 +19,7 @@ interface ActiveOrderDelivery {
 }
 
 /**
- * Drop into the buyer's order detail page. Shows nothing until a Duka Janja
+ * Drop into the buyer's order detail page. Shows nothing until a Zanshop
  * rider has accepted the delivery, then shows a live map that updates from
  * the rider's broadcast (see useDeliveryBroadcast, Phase 11) — no polling.
  */
@@ -74,3 +74,5 @@ export default function OrderLiveMapSection({ orderId }: { orderId: string }) {
     </div>
   )
 }
+
+

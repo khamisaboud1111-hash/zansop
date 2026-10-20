@@ -164,7 +164,7 @@ export default function Navbar({ categories = [] }: NavbarProps) {
                 <span className="text-white font-black text-sm tracking-tight">DJ</span>
               </div>
               <span className="text-lg font-black tracking-tight bg-gradient-to-r from-brand-600 via-brand-500 to-amber-500 bg-clip-text text-transparent">
-                DUKA JANJA
+                Zanshop
               </span>
             </Link>
           </div>
@@ -205,21 +205,14 @@ export default function Navbar({ categories = [] }: NavbarProps) {
             >
               {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="relative">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-500 via-brand-400 to-amber-400 flex items-center justify-center shadow-lg shadow-brand-500/25 group-hover:shadow-brand-500/40 transition-shadow duration-300">
-                  <span className="text-white font-black text-sm tracking-tight">DJ</span>
-                </div>
-                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-brand-400 to-amber-400 opacity-0 group-hover:opacity-20 blur transition-opacity duration-300" />
-              </div>
-              <div className="hidden sm:block">
-                <span className="text-lg font-black tracking-tight bg-gradient-to-r from-brand-600 via-brand-500 to-amber-500 bg-clip-text text-transparent">
-                  DUKA JANJA
-                </span>
-                <span className="hidden lg:inline-flex items-center ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-brand-500/10 to-amber-500/10 text-brand-600 dark:text-brand-300 border border-brand-200/50 dark:border-brand-700/50">
-                  <Sparkles className="w-2.5 h-2.5 mr-0.5" /> {t("ultimate", lang)}
-                </span>
-              </div>
+            <Link href="/" className="flex flex-col items-center gap-0.5 group">
+              <Image src="/zanshop-logo.svg" alt="Zanshop" width={32} height={32} className="mx-auto" priority />
+              <span className="text-lg font-black tracking-tight bg-gradient-to-r from-brand-600 via-brand-500 to-amber-500 bg-clip-text text-transparent">
+                Zanshop
+              </span>
+              <span className="text-brand-600 dark:text-brand-400 font-semibold text-[10px] tracking-wide mx-auto">
+                Buy and seller made easy
+              </span>
             </Link>
           </div>
 
@@ -472,3 +465,5 @@ export default function Navbar({ categories = [] }: NavbarProps) {
     </header>
   );
 }
+
+

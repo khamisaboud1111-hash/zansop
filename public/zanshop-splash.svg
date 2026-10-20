@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <defs>
+    <linearGradient id="zgrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="50%" stop-color="#0ea5e9" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+  </defs>
+  <!-- Solid black background -->
+  <rect width="200" height="200" fill="#000000" />
+  <!-- Shopping bag handle -->
+  <path d="M60 55 C60 25 90 25 90 25 L110 25 C140 25 140 55 140 55" stroke="url(#zgrad)" stroke-width="16" stroke-linecap="round" fill="none" />
+  <!-- Bag body / Z shape -->
+  <path d="M45 58 L155 58 L85 140 L155 180 L45 180 L115 58 Z" fill="url(#zgrad)" />
+  <!-- Palm tree silhouette -->
+  <path d="M50 120 L55 90 L60 120 Z M60 90 L70 95 L65 110 Z M70 90 L80 92 L75 108 Z" fill="#0f172a" />
+  <!-- Castle silhouette -->
+  <path d="M75 115 L85 100 L95 115 Z M90 100 L95 85 L100 100 Z M100 115 L110 100 L120 115 Z" fill="#0f172a" />
+  <!-- Water waves -->
+  <path d="M45 180 Q70 170 100 180 T155 180" stroke="#0ea5e9" stroke-width="4" fill="none" opacity="0.7" />
+  <path d="M45 185 Q70 175 100 185 T155 185" stroke="#0ea5e9" stroke-width="2" fill="none" opacity="0.5" />
+</svg>

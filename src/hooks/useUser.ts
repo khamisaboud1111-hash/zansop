@@ -67,3 +67,4 @@ export function useUser() {
     isSeller: profile?.role === 'seller' || profile?.role === 'admin' 
   }
 }
+

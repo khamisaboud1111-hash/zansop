@@ -35,3 +35,4 @@ export const tigoPesaAdapter: PaymentProviderAdapter = {
     throw new Error('Tigo Pesa callback handling not yet implemented.')
   },
 }
+

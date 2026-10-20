@@ -2,12 +2,14 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ShoppingBag, TrendingUp, TrendingDown, Package, Star, AlertTriangle, Plus, DollarSign, Users, Wallet, Bell, MessageSquare, BarChart2, Activity, CreditCard, Clock, CheckCircle, XCircle, Archive, Layers, Percent, Settings, PackagePlus, UsersRound, Store, PackageCheck, PackageX, Clock4, Gauge, Sparkles, ArrowUpRight, ArrowDownRight, Minus, Target, TrendingUp as TrendingUpIcon } from 'lucide-react'
+import { ShoppingBag, TrendingUp, TrendingDown, Package, Star, AlertTriangle, Plus, DollarSign, Users, Wallet, Bell, MessageSquare, BarChart2, Activity, CreditCard, Clock, CheckCircle, XCircle, Archive, Layers, Percent, Settings, PackagePlus, UsersRound, Store, PackageCheck, PackageX, Clock4, Gauge, Sparkles, ArrowUpRight, ArrowDownRight, Minus, Target, TrendingUp as TrendingUpIcon, Truck, EyeOff } from 'lucide-react'
 import { useSeller } from '@/hooks/useSeller'
 import { StatCard, PageLoader, EmptyState } from '@/components/ui'
 import { formatTZS, formatDate } from '@/utils'
 import { useDashboardStats } from '@/lib/query/hooks'
 import { DismissibleAlert } from '@/components/shared/DismissibleAlert'
+import { createClient } from '@/lib/supabase/client'
+import { useNotifications } from '@/hooks/useNotifications'
 
 interface Alert {
   id: string
@@ -17,21 +19,50 @@ interface Alert {
   actionLabel?: string
 }
 
+interface DashboardOrder {
+  id: string
+  total_amount: number
+  status: string
+  created_at: string
+  buyer?: { full_name: string; email: string }
+  delivery_address: string
+  items?: any[]
+}
+
 export default function SellerDashboardPage() {
   const { seller, loading: sellerLoading } = useSeller()
   const { data: stats, isLoading, error, refetch } = useDashboardStats()
+  const { unreadCount } = useNotifications()
   const [alerts, setAlerts] = useState<Array<{ id: string; type: 'warning' | 'info' | 'success'; message: string; action?: () => void; actionLabel?: string }>>([])
-  const [notifications, setNotifications] = useState(5)
   const [walletBalance, setWalletBalance] = useState(0)
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set())
-  const [showContent, setShowContent] = useState(false)
+  const [recentOrders, setRecentOrders] = useState<DashboardOrder[]>([])
+  const [ordersLoading, setOrdersLoading] = useState(false)
 
-  // Show content only after seller is fully loaded to prevent blink
+  // Load recent orders
   useEffect(() => {
-    if (!sellerLoading) {
-      setShowContent(true)
-    }
-  }, [sellerLoading])
+    if (!seller) return
+    setOrdersLoading(true)
+    ;(async () => {
+      try {
+        const supabase = createClient()
+        const { data } = await supabase
+          .from('orders')
+          .select(`
+            id, total_amount, status, created_at, delivery_address,
+            buyer:profiles(full_name, email)
+          `)
+          .eq('seller_id', seller.id)
+          .order('created_at', { ascending: false })
+          .limit(5)
+        setRecentOrders((data ?? []) as DashboardOrder[])
+      } catch {
+        // Silent fail - orders are optional on dashboard
+      } finally {
+        setOrdersLoading(false)
+      }
+    })()
+  }, [seller])
 
   // Load alerts when stats change
   useEffect(() => {
@@ -93,7 +124,7 @@ export default function SellerDashboardPage() {
     }
   }, [stats])
 
-  if (sellerLoading || !showContent) return <PageLoader />
+  if (sellerLoading) return <PageLoader />
 
   if (!seller) {
     return (
@@ -135,14 +166,14 @@ export default function SellerDashboardPage() {
           <Link href="/seller/products/new" className="btn-primary gap-2">
             <Plus className="w-4 h-4" /> Add Product
           </Link>
-          <button className="relative p-2 rounded-xl bg-ink-100 dark:bg-ink-800 text-ink-600 dark:text-ink-300 hover:bg-ink-200 dark:hover:bg-ink-700 transition-colors">
+          <Link href="/seller/notifications" className="relative p-2 rounded-xl bg-ink-100 dark:bg-ink-800 text-ink-600 dark:text-ink-300 hover:bg-ink-200 dark:hover:bg-ink-700 transition-colors">
             <Bell className="w-5 h-5" />
-            {notifications > 0 && (
+            {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-brand-500 text-white text-xs rounded-full flex items-center justify-center">
-                {notifications}
+                {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
-          </button>
+          </Link>
           <Link href="/seller/settings" className="p-2 rounded-xl bg-ink-100 dark:bg-ink-800 text-ink-600 dark:text-ink-300 hover:bg-ink-200 dark:hover:bg-ink-700 transition-colors">
             <Settings className="w-5 h-5" />
           </Link>
@@ -249,7 +280,7 @@ export default function SellerDashboardPage() {
               <Link href="/seller/messages" className="group p-4 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-950 transition-colors">
                 <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400 mb-2" />
                 <p className="text-sm font-medium text-ink-900 dark:text-white">Messages</p>
-                <p className="text-xs text-ink-500 dark:text-ink-400 mt-1">{notifications} unread</p>
+                <p className="text-xs text-ink-500 dark:text-ink-400 mt-1">{unreadCount} unread</p>
               </Link>
             </div>
           </div>
@@ -328,35 +359,93 @@ export default function SellerDashboardPage() {
           </div>
         </div>
 
-        {/* Recent Orders & Top Products */}
-        <div className="xl:col-span-2 space-y-4">
-          {/* Recent Orders */}
+        {/* Recent Orders */}
           <div className="card dark:bg-ink-900 dark:border-ink-800 p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-ink-800 dark:text-ink-100">Recent Orders</h2>
               <Link href="/seller/orders" className="text-xs text-brand-600 dark:text-brand-300 font-medium hover:underline">View all →</Link>
             </div>
             <div className="space-y-3">
-              <p className="text-sm text-ink-500 dark:text-ink-400 text-center py-4">Orders data loads from /seller/orders page</p>
+              {ordersLoading ? (
+                <div className="space-y-2">
+                  {[1,2,3].map((i) => (
+                    <div key={i} className="flex items-center gap-3 animate-pulse">
+                      <div className="w-8 h-8 rounded-full bg-muted flex-shrink-0" />
+                      <div className="flex-1 space-y-1">
+                        <div className="h-3 bg-muted rounded w-3/4" />
+                        <div className="h-3 bg-muted rounded w-1/2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : recentOrders.length === 0 ? (
+                <p className="text-sm text-ink-500 dark:text-ink-400 text-center py-4">No orders yet</p>
+              ) : (
+                recentOrders.map((order) => (
+                  <div key={order.id} className="flex items-center justify-between p-3 rounded-xl border border-ink-100 dark:border-ink-800 bg-white/5 dark:bg-white/5">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-ink-900 dark:text-white truncate">#{order.id.slice(-8).toUpperCase()}</p>
+                      <p className="text-xs text-ink-500 dark:text-ink-400">{order.buyer?.full_name || 'Customer'} • {formatDate(order.created_at)}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        order.status === 'delivered' ? 'bg-emerald-100 text-emerald-600' :
+                        order.status === 'pending' ? 'bg-amber-100 text-amber-600' :
+                        order.status === 'confirmed' ? 'bg-blue-100 text-blue-600' :
+                        order.status === 'packed' ? 'bg-purple-100 text-purple-600' :
+                        order.status === 'out_for_delivery' ? 'bg-indigo-100 text-indigo-600' :
+                        'bg-red-100 text-red-600'
+                      }`}
+                      >
+                        {order.status.replace('_', ' ')}
+                      </span>
+                      <span className="font-bold text-ink-900 dark:text-white">{formatTZS(order.total_amount)}</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
-          {/* Top Products */}
+          {/* Recent Products */}
           <div className="card dark:bg-ink-900 dark:border-ink-800 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-ink-800 dark:text-ink-100">Top Products</h2>
+              <h2 className="font-semibold text-ink-800 dark:text-ink-100">Your Products</h2>
               <Link href="/seller/products" className="text-xs text-brand-600 dark:text-brand-300 font-medium hover:underline">View all →</Link>
             </div>
-            <p className="text-sm text-ink-500 dark:text-ink-400 text-center py-4">Product data loads from /seller/products page</p>
+            <div className="space-y-3">
+              {stats?.totalProducts === 0 ? (
+                <p className="text-sm text-ink-500 dark:text-ink-400 text-center py-4">No products yet. <Link href="/seller/products/new" className="text-brand-600 hover:underline font-medium">Add your first product</Link></p>
+              ) : (
+                <p className="text-sm text-ink-500 dark:text-ink-400 text-center py-4">Manage your products in <Link href="/seller/products" className="text-brand-600 hover:underline font-medium">Products</Link></p>
+              )}
+            </div>
           </div>
 
           {/* Customer Insights */}
           <div className="card dark:bg-ink-900 dark:border-ink-800 p-5">
             <h2 className="font-semibold text-ink-800 dark:text-ink-100 mb-4">Customer Insights</h2>
-            <p className="text-sm text-ink-500 dark:text-ink-400 text-center py-4">Analytics data available in /seller/analytics</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm text-ink-500 dark:text-ink-400">Total Customers</span>
+                <span className="text-sm font-semibold text-ink-900 dark:text-white">{stats?.totalCustomers || 0}</span>
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm text-ink-500 dark:text-ink-400">Total Orders</span>
+                <span className="text-sm font-semibold text-ink-900 dark:text-white">{stats?.totalOrders || 0}</span>
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm text-ink-500 dark:text-ink-400">Completed Orders</span>
+                <span className="text-sm font-semibold text-ink-900 dark:text-white">{stats?.completedOrders || 0}</span>
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm text-ink-500 dark:text-ink-400">Pending Orders</span>
+                <span className="text-sm font-semibold text-ink-900 dark:text-white">{stats?.pendingOrders || 0}</span>
+              </div>
+            </div>
           </div>
-        </div>
       </div>
     </div>
   )
 }
+

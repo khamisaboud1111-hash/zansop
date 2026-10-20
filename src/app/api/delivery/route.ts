@@ -10,3 +10,4 @@ export async function GET() {
   if (error) return NextResponse.json({ data: null, error: error.message }, { status: 400 })
   return NextResponse.json({ data, error: null })
 }
+

@@ -1,7 +1,7 @@
-const CANONICAL_ORIGIN = 'https://duka-janja-pi.vercel.app'
+const CANONICAL_ORIGIN = 'https://zanshop-pi.vercel.app'
 const ALLOWED_ORIGINS = new Set([
   CANONICAL_ORIGIN,
-  'https://dukajanja.co.tz',
+  'https://zanshop.co.tz',
   'http://localhost:3000',
 ])
 
@@ -37,3 +37,5 @@ export function getSiteUrl(path = '/'): string {
   const suffix = path.startsWith('/') ? path : `/${path}`
   return `${getSiteOrigin()}${suffix}`
 }
+
+

@@ -60,7 +60,7 @@ const contactMethods = [
     icon: Mail,
     title: "contactEmailTitle",
     desc: "contactEmailDesc",
-    value: "info@dukajanja.co.tz",
+    value: "info@zanshop.co.tz",
     color: "from-brand-500 to-teal-400",
   },
   {
@@ -328,3 +328,5 @@ export default function ContactPage() {
     </motion.main>
   );
 }
+
+

@@ -167,3 +167,4 @@ function SellerCardSkeleton() {
     </div>
   )
 }
+

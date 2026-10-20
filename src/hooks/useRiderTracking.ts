@@ -159,3 +159,4 @@ export function useRiderTracking(riderId: string | undefined) {
 
   return { isOnline, setIsOnline, toggleOnline, offer, acceptOffer, declineOffer, activeDeliveryId }
 }
+

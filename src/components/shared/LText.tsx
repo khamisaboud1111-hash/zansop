@@ -10,3 +10,4 @@ export default function LText({ k, as: Tag = 'span', ...rest }: { k: Translation
   const lang = useLangStore((s) => s.lang)
   return <Tag {...rest}>{t(k, lang)}</Tag>
 }
+

@@ -15,3 +15,4 @@ export function getPaymentAdapter(provider: PaymentProvider): PaymentProviderAda
 }
 
 export * from './types'
+

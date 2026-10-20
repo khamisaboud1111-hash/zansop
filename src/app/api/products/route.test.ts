@@ -78,3 +78,4 @@ describe('POST /api/products', () => {
     expect(res.status).toBe(200)
   })
 })
+

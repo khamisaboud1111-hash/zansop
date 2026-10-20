@@ -151,7 +151,7 @@ export default function RiderApplyPage() {
           </div>
           <h1 className="font-display font-bold text-2xl text-white mb-2">Maombi Yamepokelewa!</h1>
           <p className="text-neutral-400 text-sm mb-6">
-            Asante kwa kujiunga na Duka Janja kama dereva. Msimamizi atahakiki vyeti vyako ndani ya saa 24-48.
+            Asante kwa kujiunga na Zanshop kama dereva. Msimamizi atahakiki vyeti vyako ndani ya saa 24-48.
             Utapokea taarifa pindi utakapothibitishwa.
           </p>
           <button onClick={() => router.push('/')} className="bg-white text-black font-semibold px-6 py-3 rounded-full text-sm hover:bg-neutral-200 transition-colors">Rudi Nyumbani</button>
@@ -288,3 +288,4 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
     </div>
   )
 }
+

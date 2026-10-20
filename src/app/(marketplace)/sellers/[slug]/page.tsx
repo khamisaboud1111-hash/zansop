@@ -35,7 +35,7 @@ async function getSellerProducts(sellerId: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const seller = await getSeller(params.id)
   if (!seller) return { title: 'Duka halipatikani' }
-  return { title: `${seller.store_name} — Duka Janja`, description: seller.description ?? '' }
+  return { title: `${seller.store_name} — Zanshop`, description: seller.description ?? '' }
 }
 
 export default async function SellerStorePage({ params }: Props) {
@@ -44,7 +44,7 @@ export default async function SellerStorePage({ params }: Props) {
 
   const products = await getSellerProducts(seller.id)
 
-  const waMessage = `Habari ${seller.store_name}! Nimeona duka lako kwenye Duka Janja. Nina swali...`
+  const waMessage = `Habari ${seller.store_name}! Nimeona duka lako kwenye Zanshop. Nina swali...`
   const waUrl = whatsappUrl(seller.whatsapp_number, waMessage)
 
   return (

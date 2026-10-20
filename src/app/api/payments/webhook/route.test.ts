@@ -119,3 +119,4 @@ describe('POST /api/payments/webhook', () => {
     expect(json.already_processed).toBe(true)
   })
 })
+

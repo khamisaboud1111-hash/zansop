@@ -108,3 +108,4 @@ export default function ActiveJobOverlay({ offer, onAccept, onDecline }: ActiveJ
     </div>
   )
 }
+

@@ -34,3 +34,4 @@ export const POST = withValidation(declineDeliverySchema, async (data) => {
   const result = await redispatchDelivery(supabase, data.delivery_id, auth.user.id, 'declined')
   return NextResponse.json(result)
 })
+

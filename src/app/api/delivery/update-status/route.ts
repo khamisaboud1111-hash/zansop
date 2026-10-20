@@ -77,3 +77,4 @@ export const POST = withValidation(updateDeliveryStatusSchema, async (data) => {
 
   return NextResponse.json({ success: true })
 })
+

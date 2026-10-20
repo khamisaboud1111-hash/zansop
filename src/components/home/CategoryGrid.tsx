@@ -112,3 +112,4 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
     </section>
   )
 }
+

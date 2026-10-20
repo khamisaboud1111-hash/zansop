@@ -70,3 +70,4 @@ export const POST = withValidation(riderApplicationSchema, async (data) => {
 
   return NextResponse.json({ rider_profile: riderProfile, message: 'Maombi yamepokelewa. Yanasubiri uthibitisho wa msimamizi.' })
 })
+

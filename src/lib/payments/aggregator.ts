@@ -60,7 +60,7 @@ export async function createCheckoutLink(input: CreateCheckoutLinkInput): Promis
 
   // tx_ref must be unique per attempt — include a timestamp so retries on the
   // same order don't collide with a previous attempt's reference.
-  const txRef = `dukajanja-${input.orderId}-${Date.now()}`
+  const txRef = `zanshop-${input.orderId}-${Date.now()}`
 
   try {
     const res = await fetch(`${FLW_BASE_URL}/payments`, {
@@ -80,7 +80,7 @@ export async function createCheckoutLink(input: CreateCheckoutLinkInput): Promis
           name: input.customerName,
         },
         customizations: {
-          title: 'Duka Janja',
+          title: 'Zanshop',
           description: `Malipo ya agizo #${input.orderId.slice(0, 8).toUpperCase()}`,
         },
         meta: {
@@ -161,3 +161,5 @@ export function isValidWebhookSignature(headerValue: string | null): boolean {
     return false
   }
 }
+
+

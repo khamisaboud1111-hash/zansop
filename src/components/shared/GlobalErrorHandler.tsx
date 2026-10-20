@@ -44,3 +44,4 @@ export default function GlobalErrorHandler() {
 
   return null
 }
+

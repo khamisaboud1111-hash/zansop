@@ -104,3 +104,4 @@ export async function POST(req: NextRequest) {
   const { data: urlData } = adminSupabase.storage.from(bucket).getPublicUrl(data.path)
   return NextResponse.json({ url: urlData.publicUrl, path: data.path })
 }
+

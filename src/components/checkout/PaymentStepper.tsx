@@ -112,3 +112,4 @@ export function PaymentStepperCompact({ currentStep, lang }: PaymentStepperProps
     </div>
   )
 }
+

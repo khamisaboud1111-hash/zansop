@@ -55,3 +55,4 @@ export class SectionErrorBoundary extends Component<Props, State> {
 export default function withSectionErrorBoundary(children: ReactNode, name?: string, lang?: Language) {
   return <SectionErrorBoundary name={name} lang={lang}>{children}</SectionErrorBoundary>
 }
+

@@ -153,3 +153,4 @@ export default function HeroSection({ stats }: { stats: HomeStats }) {
 }
 
 export type { HomeStats }
+

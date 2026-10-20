@@ -26,3 +26,4 @@ export default function AuthError({ error, reset }: { error: Error & { digest?: 
     </div>
   )
 }
+

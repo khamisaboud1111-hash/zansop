@@ -31,19 +31,19 @@ export const sw: Record<TranslationKey, string> = {
   haveAccount: 'Una akaunti tayari?',
   signInWith: 'Ingia',
   createAccount: 'Fungua akaunti',
-  becomeSeller: 'Uza kwenye Duka Janja',
+  becomeSeller: 'Uza kwenye Zanshop',
   passwordMinLength: 'Nywila inahitaji angalau herufi 8',
   roleBuyerTagline: 'Nunua bidhaa halisi za Zanzibar kwa urahisi na uhakika.',
   roleSellerTagline: 'Fungua duka lako na ufikie wateja kote Zanzibar.',
   roleRiderTagline: 'Pata kipato kwa kusafirisha bidhaa kwa bodaboda yako.',
-  welcome: 'Karibu Duka Janja',
+  welcome: 'Karibu Zanshop',
   accountType: 'Aina ya akaunti',
   details: 'Maelezo',
   emailAlreadyRegistered: 'Barua pepe hii tayari imesajiliwa',
   accountCreateFailed: 'Imeshindikana kufungua akaunti',
   accountCreatedVerifyEmail: 'Akaunti imefunguliwa! Thibitisha barua pepe yako kisha uingie.',
   profileUpdateFailed: 'Wasifu haukusasishwa',
-  welcomeToDukaJanja: 'Karibu Duka Janja',
+  welcomeTozanshop: 'Karibu Zanshop',
   startBuyingSellingToday: 'Anza kununua na kuuza leo',
   joinThousands: 'Jiunge na maelfu ya Wazanzibari',
   startNow: 'Anza Sasa',
@@ -58,7 +58,7 @@ export const sw: Record<TranslationKey, string> = {
   min8Chars: 'Angalau herufi 8',
   creatingAccount: 'Inafungua akaunti...',
   welcomeBack: 'Karibu tena',
-  loginSubtitle: 'Ingia kwenye akaunti yako ya Duka Janja',
+  loginSubtitle: 'Ingia kwenye akaunti yako ya Zanshop',
   redirecting: 'Inaelekeza...',
   loggedInSuccessfully: 'Umeingia kwa mafanikio!',
   loggingIn: 'Inaingia...',
@@ -178,9 +178,6 @@ export const sw: Record<TranslationKey, string> = {
   deliveryAccepted: 'Umpokeo umekubalwa!',
   failedToAcceptDelivery: 'Imeshindikana kukubali umpingo',
   pickup: 'Kuchukua',
-  loading: 'Inapakia...',
-  error: 'Hitilafu imetokea',
-  retry: 'Jaribu tena',
   save: 'Hifadhi',
   cancel: 'Ghairi',
   confirm: 'Thibitisha',
@@ -275,7 +272,7 @@ export const sw: Record<TranslationKey, string> = {
   // Zanzibar discovery
   zanzibarPride: 'Fahari ya Zanzibar',
   zanzibarTitle: 'Kununua Kunakuunganisha na Utamaduni Wetu',
-  zanzibarSubtitle: 'Duka Janja ni soko la Wazanzibari, kwa Wazanzibari.',
+  zanzibarSubtitle: 'Zanshop ni soko la Wazanzibari, kwa Wazanzibari.',
   place1Desc: 'Urithi wa Dunia wa UNESCO, mitaa ya kale na milango ya kihistoria.',
   place2Desc: 'Jengo maarufu lililokuwa la kwanza kuwa na umeme Afrika Mashariki.',
   place3Desc: 'Soko la jioni la chakula maarufu kando ya bahari Mji Mkongwe.',
@@ -292,10 +289,9 @@ export const sw: Record<TranslationKey, string> = {
   // Footer
   footerTagline: 'Soko bora la bidhaa Zanzibar. Nunua na uuze kwa urahisi.',
   buying: 'Kununua',
-  allProducts: 'Bidhaa zote',
   selling: 'Kuuza',
   support: 'Msaada',
-  copyright: '© {year} Duka Janja. Haki zote zimehifadhiwa.',
+  copyright: '© {year} Zanshop. Haki zote zimehifadhiwa.',
   newsletterTitle: 'Pata ofa za kipekee kwenye barua pepe',
   newsletterDesc: 'Jiunge na maelfu ya wanachama upate ofa bora za Zanzibar.',
   subscribe: 'Jiandikishe',
@@ -303,7 +299,7 @@ export const sw: Record<TranslationKey, string> = {
   // Homepage sections
   newProducts: 'Bidhaa Mpya',
   bottomCtaTitle: 'Anza Kununua na Kuuza Leo!',
-  bottomCtaSubtitle: 'Jiunge na maelfu ya Wazanzibari wanaotumia Duka Janja.',
+  bottomCtaSubtitle: 'Jiunge na maelfu ya Wazanzibari wanaotumia Zanshop.',
   bottomCtaTitleV2: 'Usikose — Nunua Sasa!',
   bottomCtaSubtitleV2: 'Maelfu ya bidhaa kutoka kwa wauzaji walioidhinishwa Zanzibar. Malipo salama, usafirishaji wa haraka.',
   limitedTimeOffer: 'Jiunge na wateja 10,000+ wenye furaha',
@@ -320,10 +316,10 @@ export const sw: Record<TranslationKey, string> = {
 
   // WhatsApp
   chatOnWhatsApp: 'Piga ujumse WhatsApp',
-  whatsappIntro: 'Habari! Ninapenda kununua dukani la Duka Janja. Je, unaweza kunisaidia?',
+  whatsappIntro: 'Habari! Ninapenda kununua dukani la Zanshop. Je, unaweza kunisaidia?',
 
   // Featured sellers
-  featuredSellersEmpty: 'Kuwa mmoja wa wauzaji wa kwanza Duka Janja na ufikie maelfu ya wateja Zanzibar.',
+  featuredSellersEmpty: 'Kuwa mmoja wa wauzaji wa kwanza Zanshop na ufikie maelfu ya wateja Zanzibar.',
 
   // Search
   recentSearches: 'Ulizosaka Hivi Karibuni',
@@ -370,7 +366,7 @@ export const sw: Record<TranslationKey, string> = {
   sales: 'Mauzo',
   recentlyViewed: 'Ulivyotazama hivi karibuni',
   addedToCart: 'imeongezwa kikapuni',
-  waIntro: 'Habari! Nimeona bidhaa yako kwenye Duka Janja:',
+  waIntro: 'Habari! Nimeona bidhaa yako kwenye Zanshop:',
   waAskStock: 'Je, ipo?',
 
   // Checkout
@@ -610,10 +606,10 @@ export const sw: Record<TranslationKey, string> = {
 
   // About page
   about: 'Kuhusu',
-  aboutTitle: 'Duka Janja — Soko kuu la Zanzibar',
+  aboutTitle: 'Zanshop — Soko kuu la Zanzibar',
   aboutSubtitle: 'Tunounga na wauzaji na wanaununua kote Zanzibar na Tanzania kwa malipo salama na usafirishaji wa haraka.',
   aboutOurStory: 'Hadithi Yetu',
-  aboutStoryDesc: 'Duka Janja imetokana katika moyo wa Zanzibar na lenguo kuwezesha wauzaji wa mitaa na kutoa uzo kwa wanaununua uzo kuu wa kimataifa. Tunapunguza utofauti kati ya uhandcrafted local na biologia haki.',
+  aboutStoryDesc: 'Zanshop imetokana katika moyo wa Zanzibar na lenguo kuwezesha wauzaji wa mitaa na kutoa uzo kwa wanaununua uzo kuu wa kimataifa. Tunapunguza utofauti kati ya uhandcrafted local na biologia haki.',
   aboutMission: 'Dumanu Yetu',
   aboutMissionDesc: 'Kujenga soko la imani, iliyotumia kiufundi, ambacho kinashukuru bidhaa za mitaa huku kutoa uzo kwa kila mteja.',
   aboutValues: 'Maadili Yetu',
@@ -677,7 +673,7 @@ export const sw: Record<TranslationKey, string> = {
   exclusive: 'Kipekee',
   premiumQuality: 'Ubora wa Premium',
   premiumQualityDesc: 'Bidhaa zilizo chimbayo na ubora wa kiteknolojia.',
-  whyChooseUs: 'Kwa Nini Chagua Duka Janja',
+  whyChooseUs: 'Kwa Nini Chagua Zanshop',
   whyChooseDesc: 'Tofauti ambayo inafanya na uzo kwa sisi maalum.',
   guarantee: 'Guarantee',
   guaranteeDesc: 'Hakika ya kutoa kwa kila agizo.',
@@ -713,5 +709,7 @@ export const sw: Record<TranslationKey, string> = {
   errorOccurred: 'Samahani, hitilafu imetokea.',
   tryAgain: 'Jaribu tena',
 } as const
+
+
 
 

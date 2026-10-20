@@ -26,3 +26,4 @@ export interface PaymentProviderAdapter {
     rawPayload: unknown
   }>
 }
+

@@ -26,3 +26,4 @@ export default function OnboardingError({ error, reset }: { error: Error & { dig
     </div>
   )
 }
+

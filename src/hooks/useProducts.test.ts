@@ -36,3 +36,4 @@ describe('useProducts', () => {
     expect(result.current.error).toBeNull()
   })
 })
+

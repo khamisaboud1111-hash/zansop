@@ -76,3 +76,4 @@ export function SkeletonGrid({ count = 8, className }: SkeletonGridProps) {
     </div>
   )
 }
+

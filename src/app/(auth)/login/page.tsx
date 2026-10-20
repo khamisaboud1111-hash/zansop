@@ -13,3 +13,4 @@ export default function LoginRedirect({
   if (typeof target === 'string' && target) params.set('redirect', target)
   redirect(`/onboarding${params.toString() ? `?${params.toString()}` : ''}`)
 }
+

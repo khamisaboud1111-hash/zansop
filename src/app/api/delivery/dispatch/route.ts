@@ -82,3 +82,4 @@ export const POST = withValidation(readyForPickupSchema, async (data) => {
     timeout_seconds: riderMatch ? DISPATCH_TIMEOUT_SECONDS : null,
   })
 })
+

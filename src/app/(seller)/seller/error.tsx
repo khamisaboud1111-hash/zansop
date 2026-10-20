@@ -26,3 +26,4 @@ export default function SellerError({ error, reset }: { error: Error & { digest?
     </div>
   )
 }
+

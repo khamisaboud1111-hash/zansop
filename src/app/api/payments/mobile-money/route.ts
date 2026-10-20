@@ -54,3 +54,4 @@ export const POST = withValidation(mobileMoneySchema, async (data) => {
     message: 'Ombi la limewekwa. Utaagizwa kuthibitisha malipo kwenye simu yako.',
   })
 })
+

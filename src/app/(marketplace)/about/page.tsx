@@ -127,7 +127,7 @@ export default async function AboutPage() {
               <div className="rounded-3xl overflow-hidden bg-gradient-to-br from-brand-500/20 to-amber-500/20 border border-white/20 dark:border-white/5 h-64">
                 <Image
                   src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1600&auto=format&fit=crop"
-                  alt="Duka Janja story"
+                  alt="Zanshop story"
                   fill
                   className="object-cover"
                 />
@@ -203,3 +203,4 @@ export default async function AboutPage() {
     </div>
   );
 }
+

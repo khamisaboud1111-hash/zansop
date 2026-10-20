@@ -55,3 +55,4 @@ export function useRecentlyViewed(excludeProductId?: string, limit = 10) {
 
   return { products, loading, refetch: fetch }
 }
+

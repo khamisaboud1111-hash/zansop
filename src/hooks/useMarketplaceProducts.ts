@@ -81,3 +81,4 @@ export function useMarketplaceProducts(filters: MarketplaceProductFilters = {}) 
 
   return { products, count, loading, error, refetch: fetch, totalPages: Math.ceil(count / pageSize) }
 }
+

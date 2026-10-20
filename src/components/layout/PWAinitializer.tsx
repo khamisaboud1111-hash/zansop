@@ -24,7 +24,7 @@ export default function PWAInitializer() {
           const keys = await caches.keys();
           await Promise.all(
             keys
-              .filter((name) => name.startsWith('duka-janja'))
+              .filter((name) => name.startsWith('zanshop'))
               .map((name) => caches.delete(name))
           );
         }
@@ -36,3 +36,4 @@ export default function PWAInitializer() {
 
   return null;
 }
+

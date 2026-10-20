@@ -26,3 +26,4 @@ export default function RiderError({ error, reset }: { error: Error & { digest?:
     </div>
   )
 }
+

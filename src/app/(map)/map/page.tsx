@@ -38,3 +38,4 @@ export default async function MarketplaceMapPage() {
   const pins = await getSellerPins()
   return <FullPageMap pins={pins} />
 }
+

@@ -36,3 +36,4 @@ export function DeliveryZoneAutoDetect({ onDetected, currentZone }: Props) {
     </div>
   )
 }
+

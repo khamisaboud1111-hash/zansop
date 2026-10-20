@@ -2,13 +2,14 @@ import { createServerClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Star, BadgeCheck, Package } from 'lucide-react'
+import { Star, BadgeCheck } from 'lucide-react'
 import ProductCard from '@/components/product/ProductCard'
 import LText from '@/components/shared/LText'
 import TrackView from './TrackView'
 import RecentlyViewedRow from './RecentlyViewedRow'
 import AddToCartSection from './AddToCartSection'
 import ContactSellerButtons from './ContactSellerButtons'
+import ProductImageGallery from './ProductImageGallery'
 import { formatTZS, formatDate } from '@/utils'
 import type { Metadata } from 'next'
 
@@ -58,7 +59,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const productData = product as ProductPageData
 
   return {
-    title: `${productData.name} - Duka Janja`,
+    title: `${productData.name} - Zanshop`,
     description: productData.description?.slice(0, 160),
   }
 }
@@ -87,44 +88,7 @@ export default async function ProductPage({ params }: Props) {
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
-          {/* Images */}
-          <div className="space-y-3">
-            {/* Main image — zoom on hover */}
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted group cursor-zoom-in">
-              {primaryImage ? (
-                <Image
-                  src={primaryImage.url}
-                  alt={product.name}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-125"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Package className="w-16 h-16 text-muted-foreground" />
-                </div>
-              )}
-              {product.is_made_in_zanzibar && (
-                <span className="absolute top-3 left-3 badge-orange">
-                  🏅 <LText k="madeInZanzibar" />
-                </span>
-              )}
-            </div>
-
-            {/* Thumbnails */}
-            {images.length > 1 && (
-              <div className="grid grid-cols-5 gap-2">
-                {images.map((img: ProductImage, idx: number) => (
-                  <div key={img.id} className="relative aspect-square rounded-xl overflow-hidden border-2 border-transparent cursor-pointer hover:border-brand-400 transition-colors">
-                    <Image src={img.url} alt={`${product.name} ${idx + 1}`} fill sizes="80px" className="object-cover" />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Videos - disabled for now due to RLS */}
-          </div>
+          <ProductImageGallery images={images} product={product} />
 
           {/* Product info */}
           <div className="space-y-5">

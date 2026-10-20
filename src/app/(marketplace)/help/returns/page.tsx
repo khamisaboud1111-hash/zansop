@@ -150,7 +150,7 @@ export default function ReturnsPolicyPage() {
               <LText k="returnsContactDesc" />
             </p>
             <div className="space-y-2">
-              <p><span className="font-medium">Email:</span> returns@dukajanja.co.tz</p>
+              <p><span className="font-medium">Email:</span> returns@zanshop.co.tz</p>
               <p><span className="font-medium">Phone/WhatsApp:</span> 0719 488 073</p>
               <p><span className="font-medium">Hours:</span> Mon-Sat 8am-6pm EAT</p>
             </div>
@@ -160,3 +160,4 @@ export default function ReturnsPolicyPage() {
     </main>
   );
 }
+

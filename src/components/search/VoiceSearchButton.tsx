@@ -164,3 +164,4 @@ export function VoiceSearchInline({ onTranscript, className }: { onTranscript: (
     </button>
   )
 }
+

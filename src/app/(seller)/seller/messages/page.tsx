@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { MessageCircle, Search, MoreVertical, Phone, Star, Clock, ChevronLeft } from 'lucide-react'
+import { MessageCircle, Search, MoreVertical, Phone, Star, Clock, ChevronLeft, AlertCircle } from 'lucide-react'
 import { useSeller } from '@/hooks/useSeller'
 import { useUser } from '@/hooks/useUser'
 import { useChat } from '@/hooks/useChat'
@@ -38,6 +38,7 @@ export default function SellerMessagesPage() {
   const { profile } = useUser()
   const [rooms, setRooms] = useState<RoomPreview[]>([])
   const [loadingRooms, setLoadingRooms] = useState(true)
+  const [roomsError, setRoomsError] = useState<string | null>(null)
   const [activeBuyerId, setActiveBuyerId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [showList, setShowList] = useState(true)
@@ -49,48 +50,57 @@ export default function SellerMessagesPage() {
 
   async function loadRooms() {
     setLoadingRooms(true)
-    const { data: roomRows } = await supabase
-      .from('chat_rooms')
-      .select('id, buyer_id, buyer:profiles(full_name, avatar_url)')
-      .eq('seller_id', seller!.id)
+    setRoomsError(null)
+    try {
+      const { data: roomRows, error: roomError } = await supabase
+        .from('chat_rooms')
+        .select('id, buyer_id, buyer:profiles(full_name, avatar_url)')
+        .eq('seller_id', seller!.id)
 
-    const senderId = profile?.id ?? ''
-    const previews: RoomPreview[] = await Promise.all(
-      (roomRows ?? []).map(async (r) => {
-        const [lastMsgResult, unreadResult] = await Promise.all([
-          supabase
-            .from('messages')
-            .select('body, created_at')
-            .eq('room_id', r.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-          supabase
-            .from('messages')
-            .select('id', { count: 'exact', head: true })
-            .eq('room_id', r.id)
-            .is('read_at', null)
-            .neq('sender_id', senderId),
-        ])
+      if (roomError) throw roomError
 
-        return {
-          id: r.id,
-          buyer_id: r.buyer_id,
-          buyer_name: (r as any).buyer?.full_name ?? 'Mteja',
-          buyer_avatar: (r as any).buyer?.avatar_url,
-          last_message: lastMsgResult.data?.body ?? null,
-          last_at: lastMsgResult.data?.created_at ?? null,
-          unread_count: unreadResult.count ?? 0,
-        }
-      })
-    )
+      const senderId = profile?.id ?? ''
+      const previews: RoomPreview[] = await Promise.all(
+        (roomRows ?? []).map(async (r) => {
+          const [lastMsgResult, unreadResult] = await Promise.all([
+            supabase
+              .from('messages')
+              .select('body, created_at')
+              .eq('room_id', r.id)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+            supabase
+              .from('messages')
+              .select('id', { count: 'exact', head: true })
+              .eq('room_id', r.id)
+              .is('read_at', null)
+              .neq('sender_id', senderId),
+          ])
 
-    previews.sort((a, b) => (b.last_at ?? '').localeCompare(a.last_at ?? ''))
-    setRooms(previews)
-    setLoadingRooms(false)
+          return {
+            id: r.id,
+            buyer_id: r.buyer_id,
+            buyer_name: (r as any).buyer?.full_name ?? 'Customer',
+            buyer_avatar: (r as any).buyer?.avatar_url,
+            last_message: lastMsgResult.data?.body ?? null,
+            last_at: lastMsgResult.data?.created_at ?? null,
+            unread_count: unreadResult.count ?? 0,
+          }
+        })
+      )
+
+      previews.sort((a, b) => (b.last_at ?? '').localeCompare(a.last_at ?? ''))
+      setRooms(previews)
+    } catch (err) {
+      console.error('Load rooms error:', err)
+      setRoomsError('Failed to load messages. Please try again later.')
+    } finally {
+      setLoadingRooms(false)
+    }
   }
 
-  const { messages, loading, sending, sendMessage, markRead } = useChat(activeBuyerId ?? undefined, seller?.id)
+  const { messages, loading, sending, sendMessage, markRead } = useChat({ buyerId: activeBuyerId ?? undefined, sellerId: seller?.id, participantType: 'buyer_seller' })
 
   const filteredRooms = rooms.filter(r =>
     !search || r.buyer_name.toLowerCase().includes(search.toLowerCase())
@@ -99,6 +109,24 @@ export default function SellerMessagesPage() {
   const totalUnread = rooms.reduce((s, r) => s + r.unread_count, 0)
 
   if (sellerLoading || loadingRooms) return <PageLoader />
+
+  if (roomsError) {
+    return (
+      <div className="p-4 sm:p-6 max-w-5xl">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="font-display font-black text-2xl text-ink-900">Messages</h1>
+        </div>
+        <div className="card p-6 rounded-2xl text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-ink-900 dark:text-white mb-2">Unable to load messages</h3>
+          <p className="text-ink-500 dark:text-ink-400 mb-4">{roomsError}</p>
+          <button onClick={loadRooms} className="btn-primary">
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const activeRoom = rooms.find((r) => r.buyer_id === activeBuyerId)
 
@@ -227,3 +255,4 @@ export default function SellerMessagesPage() {
     </div>
   )
 }
+

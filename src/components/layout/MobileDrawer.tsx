@@ -23,3 +23,4 @@ export default function MobileDrawer({ open, onClose, profile, categories = [] }
     </div>
   )
 }
+

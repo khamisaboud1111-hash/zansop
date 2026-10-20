@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Plus, Pencil, Trash2, Eye, EyeOff, AlertTriangle, Search, Filter, Download, Grid3X3, List, CheckSquare, Square, ChevronDown, Package, ArrowUpDown } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye, EyeOff, AlertTriangle, Search, Filter, Download, Grid3X3, List, CheckSquare, Square, ChevronDown, Package, ArrowUpDown, Share2, MessageCircle, Save, Clock, Settings } from 'lucide-react'
 import { useSeller } from '@/hooks/useSeller'
 import { ProductStatusBadge } from '@/components/ui/Badge'
 import { Modal } from '@/components/ui/Modal'
@@ -14,8 +14,8 @@ import toast from 'react-hot-toast'
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@/lib/query/hooks'
 import { DismissibleAlert } from '@/components/shared/DismissibleAlert'
 import { VirtualList } from '@/components/shared/VirtualList'
+import { cn } from '@/utils'
 
-type SortKey = 'name' | 'price' | 'stock' | 'created'
 type FilterStatus = 'all' | 'active' | 'draft' | 'out_of_stock'
 
 export default function SellerProductsPage() {
@@ -25,20 +25,17 @@ export default function SellerProductsPage() {
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
-  const [sortBy, setSortBy] = useState<SortKey>('created')
-  const [sortAsc, setSortAsc] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [bulkAction, setBulkAction] = useState<'activate' | 'deactivate' | 'delete' | null>(null)
   const [bulkLoading, setBulkLoading] = useState(false)
-  const [showFilters, setShowFilters] = useState(false)
 
   const { data, isLoading, error, refetch } = useProducts({
     search,
     status: statusFilter === 'all' ? undefined : statusFilter,
-    sortBy: sortBy === 'created' ? 'created_at' : sortBy,
-    sortOrder: sortAsc ? 'asc' : 'desc',
-    limit: 20,
+    sortBy: 'created_at',
+    sortOrder: 'desc',
+    limit: 50,
   })
 
   const createProductMutation = useCreateProduct()
@@ -46,23 +43,23 @@ export default function SellerProductsPage() {
   const deleteProductMutation = useDeleteProduct()
 
   const products = data?.products ?? []
-  const stats = data?.stats ?? { total: 0, active: 0, draft: 0, lowStock: 0, totalValue: 0 }
   const pagination = data?.pagination ?? { page: 1, limit: 20, total: 0, totalPages: 0 }
 
-  const filtered = useMemo(() => products, [products])
+  const filtered = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || p.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
 
-  const statsMemo = useMemo(() => ({
+  const stats = {
     total: products.length,
     active: products.filter(p => p.status === 'active').length,
     draft: products.filter(p => p.status === 'draft').length,
     lowStock: products.filter(p => p.stock_quantity > 0 && p.stock_quantity <= 5).length,
     totalValue: products.reduce((s, p) => s + p.price * p.stock_quantity, 0),
-  }), [products])
-
-  function toggleSort(key: SortKey) {
-    if (sortBy === key) setSortAsc(!sortAsc)
-    else { setSortBy(key); setSortAsc(false) }
   }
+
+  const viewProducts = filtered.slice(0, viewMode === 'grid' ? 24 : 50)
 
   function toggleSelect(id: string) {
     setSelected(prev => {
@@ -82,9 +79,9 @@ export default function SellerProductsPage() {
     const newStatus = product.status === 'active' ? 'draft' : 'active'
     try {
       await updateProductMutation.mutateAsync({ id: product.id, data: { status: newStatus } })
-      toast.success(newStatus === 'active' ? 'Bidhaa imewekwa kwenye soko' : 'Bidhaa imefichwa')
+      toast.success(newStatus === 'active' ? 'Product published' : 'Product hidden')
     } catch {
-      toast.error('Imeshindwa kubadilisha hali')
+      toast.error('Failed to update status')
     }
   }
 
@@ -93,9 +90,9 @@ export default function SellerProductsPage() {
     setDeleting(true)
     try {
       await deleteProductMutation.mutateAsync(deleteId)
-      toast.success('Bidhaa imefutwa')
+      toast.success('Product deleted')
     } catch {
-      toast.error('Imeshindwa kufuta')
+      toast.error('Failed to delete')
     } finally {
       setDeleteId(null)
       setDeleting(false)
@@ -110,204 +107,229 @@ export default function SellerProductsPage() {
     try {
       if (bulkAction === 'delete') {
         await Promise.all(ids.map(id => deleteProductMutation.mutateAsync(id)))
-        toast.success(`${ids.length} bidhaa zimefutwa`)
+        toast.success(`${ids.length} products deleted`)
       } else {
         const newStatus = bulkAction === 'activate' ? 'active' : 'draft'
         await Promise.all(ids.map(id => updateProductMutation.mutateAsync({ id, data: { status: newStatus } })))
-        toast.success(`${ids.length} bidhaa zimebadilishwa hadi ${newStatus}`)
+        toast.success(`${ids.length} products updated`)
       }
       setSelected(new Set())
       setBulkAction(null)
     } catch {
-      toast.error('Kushindwa kufanya hatua kwa kikundi')
+      toast.error('Failed to perform bulk action')
     } finally {
       setBulkLoading(false)
     }
   }
 
-  function exportCSV() {
-    const header = 'Name,Price,Stock,Status,Category\n'
-    const rows = filtered.map(p =>
-      `"${p.name}",${p.price},${p.stock_quantity},${p.status},"${(p as any).category?.name_sw ?? ''}"`
-    ).join('\n')
-    const blob = new Blob([header + rows], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url; a.download = 'bidhaa.csv'; a.click()
-    URL.revokeObjectURL(url)
-    toast.success('CSV imetolewa')
-  }
-
   if (sellerLoading) return <PageLoader />
 
+  // Seller profile header - Instagram style
   return (
-    <div className="p-4 sm:p-6 max-w-6xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="font-display font-black text-2xl text-ink-900">Bidhaa Zangu</h1>
-          <p className="text-sm text-ink-500 mt-0.5">{statsMemo.total} bidhaa jumla</p>
+    <div className="min-h-screen bg-background">
+      {/* Seller Profile Header */}
+      <div className="bg-card border-b border-border sticky top-0 z-20">
+        <div className="page-container py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="relative w-14 h-14 rounded-full overflow-hidden bg-ink-100 flex-shrink-0">
+                  {seller?.logo_url ? (
+                    <Image src={seller.logo_url} alt={seller.store_name} width={56} height={56} unoptimized className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-400 to-brand-600">
+                      <span className="text-2xl font-bold text-white">{seller?.store_name?.charAt(0)?.toUpperCase() ?? '?'}</span>
+                    </div>
+                  )}
+                  <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-white ring-2 ring-white flex items-center justify-center">
+                    {seller?.status === 'approved' ? (
+                      <span className="text-[10px] font-bold text-emerald-600">✓</span>
+                    ) : seller?.status === 'pending' ? (
+                      <span className="text-[10px] font-bold text-amber-600">⏳</span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-red-600">✕</span>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <h1 className="font-display font-black text-xl text-ink-900 dark:text-white">{seller?.store_name ?? 'My Store'}</h1>
+                  <p className={cn('text-sm', seller?.status === 'approved' ? 'text-emerald-600' : seller?.status === 'pending' ? 'text-amber-600' : 'text-red-600')}>
+                    {seller?.status === 'approved' ? '✓ Verified Seller' : seller?.status === 'pending' ? '⏳ Verification Pending' : '✕ Suspended'}
+                  </p>
+                </div>
+              </div>
+              {seller?.description && (
+                <p className="text-sm text-ink-600 dark:text-ink-400 max-w-md">{seller.description}</p>
+              )}
+            </div>
+
+            <div className="flex items-end gap-2 sm:flex-1">
+              <Link href="/seller/products/new" className="btn-primary flex-1 sm:auto gap-2 text-sm">
+                <Plus className="w-4 h-4" /> Add Product
+              </Link>
+              <Link href="/seller/settings" className="btn-secondary flex-1 sm:auto text-sm gap-1.5">
+                <Settings className="w-4 h-4" /> Settings
+              </Link>
+            </div>
+          </div>
         </div>
-        <Link href="/seller/products/new" className="btn-primary gap-1.5 text-sm">
-          <Plus className="w-4 h-4" /> Ongeza bidhaa
-        </Link>
       </div>
 
       {/* Error Display */}
       {error && (
-        <DismissibleAlert type="error" onDismiss={() => refetch()} className="mb-4">
-          Imeshindwa kupakia bidhaa. Jaribu tena.
+        <DismissibleAlert type="error" onDismiss={() => refetch()} className="mb-4 page-container">
+          Failed to load products. Please try again.
         </DismissibleAlert>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <StatCard label="Jumla" value={statsMemo.total} icon={<Package className="w-5 h-5" />} accent="brand" />
-        <StatCard label="Hudumu" value={statsMemo.active} icon={<Eye className="w-5 h-5" />} accent="green" />
-        <StatCard label="Rasimu" value={statsMemo.draft} icon={<EyeOff className="w-5 h-5" />} accent="gold" />
-        <StatCard label="Hisa Chache" value={statsMemo.lowStock} icon={<AlertTriangle className="w-5 h-5" />} accent="spice" />
+      {/* Stats Row */}
+      <div className="page-container grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <StatCard label="Total Products" value={stats.total} icon={<Package className="w-5 h-5" />} accent="brand" />
+        <StatCard label="Active" value={stats.active} icon={<Eye className="w-5 h-5" />} accent="green" />
+        <StatCard label="Draft" value={stats.draft} icon={<EyeOff className="w-5 h-5" />} accent="gold" />
+        <StatCard label="Low Stock" value={stats.lowStock} icon={<AlertTriangle className="w-5 h-5" />} accent="spice" />
       </div>
 
-      {/* Search & Toolbar */}
-      <div className="card p-3 mb-4">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Tafuta bidhaa..."
-              className="input pl-9 text-sm w-full"
-            />
-          </div>
-          <div className="flex gap-2">
-            <button onClick={() => setShowFilters(!showFilters)} className={`btn-secondary text-sm gap-1.5 ${showFilters ? 'bg-brand-50 text-brand-600' : ''}`}>
-              <Filter className="w-4 h-4" /> Vichujio
-              {statusFilter !== 'all' && <span className="w-2 h-2 rounded-full bg-brand-500" />}
-            </button>
-            <button onClick={exportCSV} className="btn-secondary text-sm gap-1.5">
-              <Download className="w-4 h-4" /> CSV
-            </button>
-            <div className="flex bg-ink-100 rounded-lg p-0.5">
-              <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-ink-900' : 'text-ink-400'}`}>
-                <Grid3X3 className="w-4 h-4" />
-              </button>
-              <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-ink-900' : 'text-ink-400'}`}>
-                <List className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+      {/* Search & Filters */}
+      <div className="page-container flex flex-col sm:flex-row gap-3 mb-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search products..."
+            className="input pl-9 text-sm w-full"
+          />
         </div>
-
-        {/* Filter Panel */}
-        {showFilters && (
-          <div className="mt-3 pt-3 border-t border-ink-100 flex flex-wrap gap-2">
-            {(['all', 'active', 'draft', 'out_of_stock'] as const).map(s => (
-              <button key={s} onClick={() => setStatusFilter(s)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                  statusFilter === s ? 'bg-brand-500 text-white' : 'bg-ink-100 text-ink-600 hover:bg-ink-200'
-                }`}>
-                {s === 'all' ? 'Zote' : s === 'active' ? 'Hudumu' : s === 'draft' ? 'Rasimu' : 'Zimeisha'}
-              </button>
-            ))}
-            <div className="ml-auto flex items-center gap-1 text-xs text-ink-500">
-              <ArrowUpDown className="w-3 h-3" />
-              <button onClick={() => toggleSort('name')} className={`hover:text-ink-800 ${sortBy === 'name' ? 'text-brand-600 font-bold' : ''}`}>Jina</button>
-              <span>/</span>
-              <button onClick={() => toggleSort('price')} className={`hover:text-ink-800 ${sortBy === 'price' ? 'text-brand-600 font-bold' : ''}`}>Bei</button>
-              <span>/</span>
-              <button onClick={() => toggleSort('stock')} className={`hover:text-ink-800 ${sortBy === 'stock' ? 'text-brand-600 font-bold' : ''}`}>Hisa</button>
-            </div>
-          </div>
-        )}
+        <div className="flex gap-2 sm:flex-1">
+          <button onClick={() => setStatusFilter('all')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${statusFilter === 'all' ? 'bg-brand-500 text-white' : 'bg-ink-100 text-ink-600'}`}>All</button>
+          <button onClick={() => setStatusFilter('active')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${statusFilter === 'active' ? 'bg-emerald-500 text-white' : 'bg-ink-100 text-ink-600'}`}>Active</button>
+          <button onClick={() => setStatusFilter('draft')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${statusFilter === 'draft' ? 'bg-amber-500 text-white' : 'bg-ink-100 text-ink-600'}`}>Draft</button>
+          <button onClick={() => setStatusFilter('out_of_stock')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${statusFilter === 'out_of_stock' ? 'bg-red-500 text-white' : 'bg-ink-100 text-ink-600'}`}>Out of Stock</button>
+        </div>
+        <div className="flex gap-2 sm:flex-1 justify-end">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-ink-900' : 'text-ink-400 hover:bg-ink-50'}`}
+          >
+            <Grid3X3 className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-ink-900' : 'text-ink-400 hover:bg-ink-50'}`}
+          >
+            <List className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Bulk Actions Bar */}
       {selected.size > 0 && (
-        <div className="mb-4 p-3 bg-brand-50 border border-brand-200 rounded-xl flex items-center justify-between">
-          <span className="text-sm font-medium text-brand-800">{selected.size} imechaguliwa</span>
+        <div className="page-container mb-4 p-3 bg-brand-50 border border-brand-200 rounded-xl flex items-center justify-between">
+          <span className="text-sm font-medium text-brand-800">{selected.size} products selected</span>
           <div className="flex gap-2">
-            <button onClick={() => setBulkAction('activate')} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors">
-              Washa
+            <button onClick={() => setBulkAction('activate')} disabled={bulkLoading} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 disabled:opacity-50 transition-colors">
+              Publish
             </button>
-            <button onClick={() => setBulkAction('deactivate')} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors">
-              Zima
+            <button onClick={() => setBulkAction('deactivate')} disabled={bulkLoading} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 hover:bg-amber-200 disabled:opacity-50 transition-colors">
+              Hide
             </button>
-            <button onClick={() => setBulkAction('delete')} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
-              Futa
+            <button onClick={() => setBulkAction('delete')} disabled={bulkLoading} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 transition-colors">
+              Delete
             </button>
             <button onClick={() => setSelected(new Set())} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-ink-100 text-ink-600 hover:bg-ink-200 transition-colors">
-              Ondoa
+              Clear
             </button>
           </div>
         </div>
       )}
 
-      {/* Product Grid / List */}
+      {/* Products Grid */}
       {isLoading ? (
-        <div className={viewMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3' : 'space-y-2'}>
-          {Array.from({ length: 6 }).map((_, i) => <div key={i} className="card h-48 animate-pulse rounded-2xl" />)}
+        <div className="page-container grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="card h-[360px] animate-pulse rounded-2xl" />
+          ))}
         </div>
       ) : filtered.length === 0 ? (
-        <EmptyState
-          icon={<Package className="w-10 h-10" />}
-          title={search || statusFilter !== 'all' ? 'Hakuna bidhaa zinazolingana' : 'Huna bidhaa bado'}
-          description={search || statusFilter !== 'all' ? 'Badilisha vichujio au ongeza bidhaa mpya' : 'Ongeza bidhaa yako ya kwanza'}
-          action={!search && statusFilter === 'all' ? <Link href="/seller/products/new" className="btn-primary">Ongeza bidhaa</Link> : undefined}
-        />
+        <div className="page-container text-center py-20">
+          <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+            <Package className="w-10 h-10 text-ink-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-ink-900 dark:text-white mb-2">
+            {search || statusFilter !== 'all' ? 'No products found' : 'No products yet'}
+          </h3>
+          <p className="text-ink-500 dark:text-ink-400 max-w-xs mx-auto mb-6">
+            {search || statusFilter !== 'all' ? 'Try different filters or add a new product' : 'Start by adding your first product'}
+          </p>
+          {!search && statusFilter === 'all' && (
+            <Link href="/seller/products/new" className="btn-primary">
+              <Plus className="w-4 h-4 mr-2" /> Add Product
+            </Link>
+          )}
+        </div>
       ) : viewMode === 'grid' ? (
-        <VirtualList
-          items={filtered}
-          itemHeight={320}
-          renderItem={(p) => {
+        <div className="page-container grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {viewProducts.map((p) => {
             const img = p.images?.find(i => i.is_primary) ?? p.images?.[0]
             const isSelected = selected.has(p.id)
             return (
-              <div key={p.id} className={`card rounded-2xl overflow-hidden group transition-all hover:shadow-lg ${isSelected ? 'ring-2 ring-brand-500' : ''}`}>
-                {/* Image */}
+              <div key={p.id} className={`card rounded-2xl overflow-hidden group transition-all hover:shadow-xl ${isSelected ? 'ring-2 ring-brand-500 bg-brand-50 dark:bg-brand-950/20' : ''}`}>
                 <div className="relative aspect-square bg-ink-100">
-                  {img ? (
-                    <Image
-                      src={img.url}
-                      alt={p.name}
-                      fill
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Package className="w-10 h-10 text-ink-300" />
-                    </div>
-                  )}
-                  {/* Status Badge */}
-                  <div className="absolute top-2 left-2">
-                    <ProductStatusBadge status={p.status} />
-                  </div>
-                  {/* Select Checkbox */}
-                  <button onClick={(e) => { e.stopPropagation(); toggleSelect(p.id) }}
-                    className="absolute top-2 right-2 w-6 h-6 rounded-md bg-white/90 hover:bg-white flex items-center justify-center shadow-sm transition-all">
+                  <button
+                    onClick={() => toggleSelect(p.id)}
+                    className="absolute top-2 right-2 w-6 h-6 rounded-md bg-white/90 hover:bg-white flex items-center justify-center shadow-sm transition-all"
+                  >
                     {isSelected ? <CheckSquare className="w-4 h-4 text-brand-600" /> : <Square className="w-4 h-4 text-ink-300" />}
                   </button>
-                  {/* Low Stock Alert */}
-                  {p.stock_quantity > 0 && p.stock_quantity <= 5 && (
-                    <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" /> Hisa: {p.stock_quantity}
+                  <Link href={`/products/${p.slug}`} className="block">
+                    {img ? (
+                      <Image
+                        src={img.url}
+                        alt={p.name}
+                        fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package className="w-10 h-10 text-ink-300" />
+                      </div>
+                    )}
+                    <div className="absolute top-2 left-2">
+                      <ProductStatusBadge status={p.status} />
                     </div>
-                  )}
-                </div>
-                {/* Info */}
-                <div className="p-3">
-                  <p className="font-semibold text-sm text-ink-900 truncate">{p.name}</p>
-                  <p className="text-xs text-ink-500 mt-0.5">{(p as any).category?.name_sw ?? 'Haina aina'}</p>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="font-display font-bold text-brand-700">{formatTZS(p.price)}</span>
-                    <span className={`text-xs font-medium ${p.stock_quantity === 0 ? 'text-red-500' : p.stock_quantity <= 5 ? 'text-amber-500' : 'text-emerald-600'}`}>
-                      {p.stock_quantity} mfuko
-                    </span>
+                    {p.stock_quantity > 0 && p.stock_quantity <= 5 && (
+                      <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3" /> {p.stock_quantity}
+                      </div>
+                    )}
+                  </Link>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-3">
+                    <div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleStatus(p) }}
+                        className="p-2 rounded-lg bg-white text-brand-600 hover:bg-brand-50 transition-colors" title={p.status === 'active' ? 'Hide' : 'Publish'}
+                      >
+                        {p.status === 'active' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDeleteId(p.id) }}
+                        className="p-2 rounded-lg bg-white text-red-500 hover:bg-red-50 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                  {/* Actions */}
+                </div>
+                <div className="p-3">
+                  <Link href={`/products/${p.slug}`} className="block">
+                    <p className="font-semibold text-sm text-ink-900 dark:text-white truncate mb-1">{p.name}</p>
+                    <p className="text-xs text-ink-500 dark:text-ink-400">{p.stock_quantity} in stock</p>
+                    <span className="font-display font-bold text-brand-700">{formatTZS(p.price)}</span>
+                  </Link>
                   <div className="flex items-center justify-end gap-1 mt-2 pt-2 border-t border-ink-100">
-                    <button onClick={() => toggleStatus(p)} className="p-1.5 rounded-lg text-ink-400 hover:bg-brand-50 hover:text-brand-600 transition-colors" title={p.status === 'active' ? 'Ficha' : 'Chapisha'}>
+                    <button onClick={(e) => { e.stopPropagation(); toggleStatus(p) }} className="p-1.5 rounded-lg text-ink-400 hover:bg-brand-50 hover:text-brand-600 transition-colors" title={p.status === 'active' ? 'Hide' : 'Publish'}>
                       {p.status === 'active' ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
                     <Link href={`/seller/products/edit/${p.id}`} className="p-1.5 rounded-lg text-ink-400 hover:bg-brand-50 hover:text-brand-600 transition-colors">
@@ -320,13 +342,11 @@ export default function SellerProductsPage() {
                 </div>
               </div>
             )
-          }}
-          itemKey={(p) => p.id}
-          overscan={3}
-        />
+          })}
+        </div>
       ) : (
         /* List View */
-        <div className="card overflow-hidden rounded-2xl">
+        <div className="page-container card overflow-hidden rounded-2xl">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-ink-50 border-b border-ink-100">
@@ -336,16 +356,16 @@ export default function SellerProductsPage() {
                       {selected.size === filtered.length && filtered.length > 0 ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
                     </button>
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-ink-600 uppercase tracking-wide">Bidhaa</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-ink-600 uppercase tracking-wide hidden sm:table-cell">Aina</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-ink-600 uppercase tracking-wide">Bei</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-ink-600 uppercase tracking-wide">Hisa</th>
-                  <th className="text-center px-4 py-3 text-xs font-semibold text-ink-600 uppercase tracking-wide">Hali</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-ink-600 uppercase tracking-wide">Vitendo</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-ink-600 uppercase tracking-wide">Product</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-ink-600 uppercase tracking-wide hidden sm:table-cell">Category</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-ink-600 uppercase tracking-wide">Price</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-ink-600 uppercase tracking-wide">Stock</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-ink-600 uppercase tracking-wide">Status</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-ink-600 uppercase tracking-wide">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-100">
-                {filtered.map(p => {
+                {viewProducts.map(p => {
                   const img = p.images?.find(i => i.is_primary) ?? p.images?.[0]
                   const isSelected = selected.has(p.id)
                   return (
@@ -361,9 +381,11 @@ export default function SellerProductsPage() {
                             {img ? <Image src={img.url} alt="" fill sizes="40px" className="object-cover" /> : <div className="w-full h-full bg-ink-100 flex items-center justify-center"><Package className="w-5 h-5 text-ink-300" /></div>}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-ink-900 truncate max-w-[180px]">{p.name}</p>
+                            <Link href={`/products/${p.slug}`} className="block">
+                              <p className="font-medium text-ink-900 dark:text-white truncate max-w-[180px]">{p.name}</p>
+                            </Link>
                             {p.stock_quantity <= 5 && p.stock_quantity > 0 && (
-                              <p className="text-xs text-amber-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />Hisa chache</p>
+                              <p className="text-xs text-amber-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />Low stock</p>
                             )}
                           </div>
                         </div>
@@ -384,7 +406,7 @@ export default function SellerProductsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => toggleStatus(p)} className="p-1.5 rounded-lg text-ink-500 hover:bg-brand-50 hover:text-brand-600 transition-colors" title={p.status === 'active' ? 'Ficha' : 'Chapisha'}>
+                          <button onClick={(e) => { e.stopPropagation(); toggleStatus(p) }} className="p-1.5 rounded-lg text-ink-500 hover:bg-brand-50 hover:text-brand-600 transition-colors" title={p.status === 'active' ? 'Hide' : 'Publish'}>
                             {p.status === 'active' ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                           </button>
                           <Link href={`/seller/products/edit/${p.id}`} className="p-1.5 rounded-lg text-ink-500 hover:bg-brand-50 hover:text-brand-600 transition-colors">
@@ -404,51 +426,29 @@ export default function SellerProductsPage() {
         </div>
       )}
 
-      {/* Pagination */}
-      {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-6">
-          <button
-            onClick={() => refetch({ ...pagination, page: Math.max(1, pagination.page - 1) })}
-            disabled={pagination.page <= 1}
-            className="btn-secondary disabled:opacity-50 gap-1.5 text-sm"
-          >
-            <ChevronDown className="w-4 h-4 rotate-180" /> Nyuma
-          </button>
-          <span className="text-sm text-ink-600 mx-2">
-            Ukurasa {pagination.page} / {pagination.totalPages}
-          </span>
-          <button
-            onClick={() => refetch({ ...pagination, page: Math.min(pagination.totalPages, pagination.page + 1) })}
-            disabled={pagination.page >= pagination.totalPages}
-            className="btn-secondary disabled:opacity-50 gap-1.5 text-sm"
-          >
-            Endelea <ChevronDown className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+      {/* Delete Single Modal */}
+      <Modal open={!!deleteId} onClose={() => setDeleteId(null)} title="Delete Product" size="sm">
+        <ConfirmDialog
+          message="Are you sure you want to delete this product? This cannot be undone."
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteId(null)}
+          loading={deleting}
+          variant="danger"
+        />
+      </Modal>
 
       {/* Bulk Action Confirm Modal */}
       <Modal open={!!bulkAction} onClose={() => setBulkAction(null)} title={
-        bulkAction === 'delete' ? 'Futa bidhaa' : bulkAction === 'activate' ? 'Washa bidhaa' : 'Zima bidhaa'
+        bulkAction === 'delete' ? 'Delete Products' : bulkAction === 'activate' ? 'Publish Products' : 'Hide Products'
       } size="sm">
         <ConfirmDialog
           message={bulkAction === 'delete'
-            ? `Una uhakika wa kufuta bidhaa ${selected.size}? Hii haiwezi kurudishwa.`
-            : `Badilisha hadi ${bulkAction === 'activate' ? 'hudumu' : 'rasimu'} kwa bidhaa ${selected.size}?`}
+            ? `Are you sure you want to delete ${selected.size} products? This cannot be undone.`
+            : `Change to ${bulkAction === 'activate' ? 'published' : 'hidden'} for ${selected.size} products?`}
           onConfirm={handleBulkAction}
           onCancel={() => setBulkAction(null)}
           loading={bulkLoading}
           variant={bulkAction === 'delete' ? 'danger' : 'primary'}
-        />
-      </Modal>
-
-      {/* Delete Single Modal */}
-      <Modal open={!!deleteId} onClose={() => setDeleteId(null)} title="Futa bidhaa" size="sm">
-        <ConfirmDialog
-          message="Una uhakika wa kufuta bidhaa hii? Kitendo hiki hakiwezi kurudishwa."
-          onConfirm={handleDelete}
-          onCancel={() => setDeleteId(null)}
-          loading={deleting}
         />
       </Modal>
     </div>

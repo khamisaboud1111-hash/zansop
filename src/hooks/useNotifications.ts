@@ -128,3 +128,4 @@ export function useNotifications() {
 
   return { notifications, unreadCount, loading, error, markRead, markAllRead, deleteNotification, refetch: fetch }
 }
+

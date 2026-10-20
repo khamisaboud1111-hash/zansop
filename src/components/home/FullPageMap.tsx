@@ -38,3 +38,4 @@ export default function FullPageMap({ pins }: { pins: SellerPin[] }) {
     </div>
   )
 }
+

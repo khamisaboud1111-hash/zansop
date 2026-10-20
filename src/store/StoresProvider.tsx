@@ -105,7 +105,7 @@ function createCartStore() {
         },
       }),
       {
-        name: 'duka-janja-cart',
+        name: 'zanshop-cart',
         // Rehydrating from localStorage during the first client render makes the
         // cart differ from the server-rendered markup, which threw a hydration
         // mismatch (React #418/#422) and left the root on a blank client render.
@@ -132,10 +132,10 @@ function createCartStore() {
 }
 
 function createUiStore() {
-  return create<UiStore>()(() => ({
+  return create<UiStore>()((set) => ({
     sidebarOpen: false,
-    setSidebarOpen: (open: boolean) => { /* no-op */ },
-    toggleSidebar: () => { /* no-op */ },
+    setSidebarOpen: (open: boolean) => set({ sidebarOpen: open }),
+    toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   }))
 }
 
@@ -246,24 +246,32 @@ export function StoresProvider({ children }: { children: ReactNode }) {
 // `useLangStore.getState()` threw - which broke the error boundaries into
 // rendering nothing (a silent blank page) and add-to-cart into failing.
 
-export function useCartStore<T>(selector?: (state: CartStore) => T): T | ReturnType<typeof createCartStore> {
+export function useCartStore(): CartStore
+export function useCartStore<T>(selector: (state: CartStore) => T): T
+export function useCartStore<T>(selector?: (state: CartStore) => T): T | CartStore {
   const store = useStores().useCartStore
-  return selector ? store(selector) : store
+  return selector ? store(selector) : store()
 }
 
-export function useUiStore<T>(selector?: (state: UiStore) => T): T | ReturnType<typeof createUiStore> {
+export function useUiStore(): UiStore
+export function useUiStore<T>(selector: (state: UiStore) => T): T
+export function useUiStore<T>(selector?: (state: UiStore) => T): T | UiStore {
   const store = useStores().useUiStore
-  return selector ? store(selector) : store
+  return selector ? store(selector) : store()
 }
 
-export function useLangStore<T>(selector?: (state: LangStore) => T): T | ReturnType<typeof createLangStore> {
+export function useLangStore(): LangStore
+export function useLangStore<T>(selector: (state: LangStore) => T): T
+export function useLangStore<T>(selector?: (state: LangStore) => T): T | LangStore {
   const store = useStores().useLangStore
-  return selector ? store(selector) : store
+  return selector ? store(selector) : store()
 }
 
-export function useThemeStore<T>(selector?: (state: ThemeStore) => T): T | ReturnType<typeof createThemeStore> {
+export function useThemeStore(): ThemeStore
+export function useThemeStore<T>(selector: (state: ThemeStore) => T): T
+export function useThemeStore<T>(selector?: (state: ThemeStore) => T): T | ThemeStore {
   const store = useStores().useThemeStore
-  return selector ? store(selector) : store
+  return selector ? store(selector) : store()
 }
 
 // ─── Selectors ────────────────────────────────────────────────────────────────
@@ -280,3 +288,4 @@ export const selectCartTotalSavings = (state: { items: CartItem[] }) =>
     const currentPrice = item.product?.price ?? 0
     return sum + Math.max(0, (originalPrice - currentPrice) * item.quantity)
   }, 0)
+

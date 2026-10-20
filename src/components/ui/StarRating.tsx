@@ -35,3 +35,4 @@ export function StarRating({ value, onChange, size = 'md', readonly = false }: S
     </div>
   )
 }
+

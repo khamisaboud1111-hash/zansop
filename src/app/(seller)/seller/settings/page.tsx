@@ -286,15 +286,15 @@ export default function SellerSettingsPage() {
             <div className="px-4 py-3">
               <p className="text-xs text-ink-500 mb-3">Chagua maeneo unayofikisha bidhaa:</p>
               <div className="grid grid-cols-2 gap-2">
-                {DELIVERY_ZONES.map(z => (
-                  <button key={z.value} onClick={() => toggleDeliveryZone(z.value)}
+                {CANONICAL_ZONES.map(z => (
+                  <button key={z.zone} onClick={() => toggleDeliveryZone(z.zone)}
                     className={`text-left text-xs font-medium px-3 py-2 rounded-xl border transition-all ${
-                      deliveryZones.includes(z.value)
+                      deliveryZones.includes(z.zone)
                         ? 'border-brand-400 bg-brand-50 text-brand-700'
                         : 'border-ink-200 text-ink-600 hover:border-ink-300'
                     }`}>
-                    {deliveryZones.includes(z.value) && <CheckCircle className="w-3 h-3 inline mr-1" />}
-                    {z.label}
+                    {deliveryZones.includes(z.zone) && <CheckCircle className="w-3 h-3 inline mr-1" />}
+                    {z.name_sw}
                   </button>
                 ))}
               </div>
@@ -413,3 +413,4 @@ function SettingsRow({ label, value, editing, editValue, onEditValue, onStartEdi
     </button>
   )
 }
+

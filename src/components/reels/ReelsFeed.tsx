@@ -57,13 +57,13 @@ export default function ReelsFeed({ initialReels = [], hashtag, sellerId, lang }
   const observerRef = useRef<IntersectionObserver | null>(null)
 
   const loadMore = useCallback(async () => {
-    if (loadingMore || !hasMore || !nextCursor) return
+    if (loadingMore || !hasMore) return
 
     setLoadingMore(true)
     try {
       const params = new URLSearchParams({
         limit: '20',
-        cursor: nextCursor,
+        ...(nextCursor && { cursor: nextCursor }),
         ...(hashtag && { hashtag }),
         ...(sellerId && { sellerId })
       })
@@ -83,6 +83,7 @@ export default function ReelsFeed({ initialReels = [], hashtag, sellerId, lang }
       toast.error(t('loadMoreFailed', lang))
     } finally {
       setLoadingMore(false)
+      setLoading(false)
     }
   }, [loadingMore, hasMore, nextCursor, hashtag, sellerId, lang])
 
@@ -477,3 +478,4 @@ export default function ReelsFeed({ initialReels = [], hashtag, sellerId, lang }
     </div>
   )
 }
+

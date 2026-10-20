@@ -46,7 +46,7 @@ export default function AdminSellersPage() {
 
     // Notify seller
     const messages: Record<string, { titleEn: string; titleSw: string; bodyEn: string; bodySw: string; type: string }> = {
-      approved:  { titleEn: 'Seller approved!', titleSw: 'Umeidhinishwa!', bodyEn: 'Your store is now live on Duka Janja.', bodySw: 'Duka lako sasa linaonekana kwenye Duka Janja.', type: 'seller_approved' },
+      approved:  { titleEn: 'Seller approved!', titleSw: 'Umeidhinishwa!', bodyEn: 'Your store is now live on Zanshop.', bodySw: 'Duka lako sasa linaonekana kwenye Zanshop.', type: 'seller_approved' },
       suspended: { titleEn: 'Account suspended', titleSw: 'Akaunti imesimamishwa', bodyEn: 'Your seller account has been suspended.', bodySw: 'Akaunti yako ya muuzaji imesimamishwa.', type: 'seller_suspended' },
       pending:   { titleEn: 'Account reactivated', titleSw: 'Akaunti imerejeshwa', bodyEn: 'Your account is active again.', bodySw: 'Akaunti yako imefanya kazi tena.', type: 'seller_approved' },
     }
@@ -87,7 +87,7 @@ export default function AdminSellersPage() {
       ) : (
         <div className="space-y-3">
           {sellers.map((seller: any) => {
-            const waUrl = whatsappUrl(seller.whatsapp_number, `Habari ${seller.store_name}, hii ni Duka Janja Admin.`)
+            const waUrl = whatsappUrl(seller.whatsapp_number, `Habari ${seller.store_name}, hii ni Zanshop Admin.`)
             return (
               <div key={seller.id} className="card p-4">
                 <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -163,3 +163,5 @@ export default function AdminSellersPage() {
     </div>
   )
 }
+
+

@@ -125,3 +125,4 @@ export function ConfirmDialog({ message, onConfirm, onCancel, loading, variant =
     </div>
   )
 }
+

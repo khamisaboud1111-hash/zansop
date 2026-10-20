@@ -120,7 +120,7 @@ export default function ShippingPolicyPage() {
               <LText k="contactDesc" />
             </p>
             <div className="space-y-2">
-              <p><span className="font-medium">Email:</span> support@dukajanja.co.tz</p>
+              <p><span className="font-medium">Email:</span> support@zanshop.co.tz</p>
               <p><span className="font-medium">Phone/WhatsApp:</span> 0719 488 073</p>
               <p><span className="font-medium">Hours:</span> Mon-Sat 8am-6pm EAT</p>
             </div>
@@ -130,3 +130,4 @@ export default function ShippingPolicyPage() {
     </main>
   );
 }
+

@@ -134,3 +134,4 @@ export default function FeaturedSellersShowcase({ sellers }: { sellers: Featured
     </section>
   )
 }
+

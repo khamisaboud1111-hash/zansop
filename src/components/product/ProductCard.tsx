@@ -206,3 +206,4 @@ export default function ProductCard({ product, imageless = false }: ProductCardP
   </Link>
   )
 }
+

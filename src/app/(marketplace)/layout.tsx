@@ -24,3 +24,4 @@ export default async function MarketplaceLayout({ children }: { children: React.
     </ErrorBoundary>
   )
 }
+

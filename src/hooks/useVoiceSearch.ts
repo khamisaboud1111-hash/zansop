@@ -125,3 +125,4 @@ export function useVoiceSearch({ onResult, lang }: VoiceSearchOptions) {
 
   return { isListening, isSupported, startListening, stopListening, error, permissionDenied, permissionState }
 }
+
