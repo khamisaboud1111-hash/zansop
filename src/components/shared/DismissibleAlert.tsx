@@ -5,17 +5,27 @@ import { X, AlertTriangle } from 'lucide-react'
 import { cn } from '@/utils'
 
 interface DismissibleAlertProps {
-  message: string
+  message?: string
+  /** JSX content, used in place of `message` when provided. */
+  children?: React.ReactNode
   onDismiss: () => void
   type?: 'error' | 'warning' | 'info' | 'success'
   autoDismissMs?: number
+  className?: string
+  /** Optional call-to-action rendered next to the message. */
+  actionLabel?: string
+  action?: () => void
 }
 
 export function DismissibleAlert({
   message,
+  children,
   onDismiss,
   type = 'error',
   autoDismissMs = 5000,
+  className,
+  actionLabel,
+  action,
 }: DismissibleAlertProps) {
   const [isVisible, setIsVisible] = useState(true)
   const [isExiting, setIsExiting] = useState(false)
@@ -121,12 +131,23 @@ export function DismissibleAlert({
         'relative flex items-start gap-3 p-4 rounded-xl border animate-slide-in',
         isExiting && 'animate-fade-out',
         colors[type],
-        'touch-none select-none'
+        'touch-none select-none',
+        className
       )}
       style={{ cursor: 'grab' }}
     >
       <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
-      <p className="flex-1 text-sm font-medium leading-relaxed">{children || message}</p>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium leading-relaxed">{children || message}</p>
+        {actionLabel && action && (
+          <button
+            onClick={(e) => { e.stopPropagation(); action() }}
+            className="mt-2 text-xs font-semibold underline underline-offset-2 hover:opacity-80"
+          >
+            {actionLabel}
+          </button>
+        )}
+      </div>
       <button
         onClick={(e) => { e.stopPropagation(); dismiss() }}
         className="flex-shrink-0 p-1.5 rounded-lg hover:bg-black/10 transition-colors text-current opacity-60 hover:opacity-100"

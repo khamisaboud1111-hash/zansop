@@ -222,7 +222,7 @@ export default function SettingsPage() {
               </svg>
             }
             label={t('zone', lang)}
-            value={profile.delivery_zone ? (getDefaultDeliveryZones().find(z => z.zone === profile.delivery_zone)?.nameEn ?? profile.delivery_zone) : '—'}
+            value={profile.delivery_zone ? (getDefaultDeliveryZones().find(z => z.zone === profile.delivery_zone)?.name_en ?? profile.delivery_zone) : '—'}
             editing={editField === 'delivery_zone'}
             editValue={fieldValue}
             onEditValue={setFieldValue}
@@ -231,7 +231,7 @@ export default function SettingsPage() {
             onCancel={cancelEdit}
             saving={saving}
             isSelect
-            selectOptions={getDefaultDeliveryZones().map(z => ({ value: z.zone, label: z.nameEn }))}
+            selectOptions={getDefaultDeliveryZones().map(z => ({ value: z.zone, label: z.name_en }))}
           />
           <ProfileRow
             icon={

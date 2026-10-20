@@ -294,8 +294,8 @@ export default function CheckoutPage() {
                   <select {...register('delivery_zone')} className="input min-h-[48px]">
                     <option value="">{t('chooseZone', lang)}</option>
                     {getDefaultDeliveryZones().map((zone) => (
-                      <option key={key} value={key}>
-                        {lang === 'sw' ? zone.nameSw : zone.nameEn} — {formatTZS(zone.fee, lang)} ({zone.days} {t('days', lang)})
+                      <option key={zone.zone} value={zone.zone}>
+                        {lang === 'sw' ? zone.name_sw : zone.name_en} — {formatTZS(zone.fee, lang)} ({zone.estimated_days} {t('days', lang)})
                       </option>
                     ))}
                   </select>

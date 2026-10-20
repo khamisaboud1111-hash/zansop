@@ -210,10 +210,12 @@ export function StoresProvider({ children }: { children: ReactNode }) {
       // Persist is a convenience, never hard-require it.
     }
 
-    // Initialize online/offline listeners
+    // Initialize online/offline listeners. The handlers are declared outside
+    // the try block so the cleanup below can actually remove them - scoping
+    // them to the try made them undefined in the cleanup.
+    const handleOnline = () => stores.useCartStore.getState().setOnlineStatus(true)
+    const handleOffline = () => stores.useCartStore.getState().setOnlineStatus(false)
     try {
-      const handleOnline = () => stores.useCartStore.getState().setOnlineStatus(true)
-      const handleOffline = () => stores.useCartStore.getState().setOnlineStatus(false)
       window.addEventListener('online', handleOnline)
       window.addEventListener('offline', handleOffline)
       stores.useCartStore.getState().setOnlineStatus(navigator.onLine)

@@ -29,7 +29,7 @@ export function DeliveryZoneAutoDetect({ onDetected, currentZone }: Props) {
       {currentZone && getDefaultDeliveryZones().find(z => z.zone === currentZone) && (
         <p className="text-xs text-ink-500 flex items-center gap-1">
           <MapPin className="w-3 h-3" />
-          {lang === 'sw' ? getDefaultDeliveryZones().find(z => z.zone === currentZone)?.nameSw : getDefaultDeliveryZones().find(z => z.zone === currentZone)?.nameEn}
+          {lang === 'sw' ? getDefaultDeliveryZones().find(z => z.zone === currentZone)?.name_sw : getDefaultDeliveryZones().find(z => z.zone === currentZone)?.name_en}
         </p>
       )}
       {error && <p className="text-xs text-red-500">{error}</p>}
