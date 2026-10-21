@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { withValidation } from '@/lib/validation/withValidation'
 import { updateDeliveryStatusSchema } from '@/lib/validation/rider'
 
@@ -46,44 +47,47 @@ export const POST = withValidation(updateDeliveryStatusSchema, async (data) => {
     return NextResponse.json({ error: 'Imeshindikana kusasisha (update failed)' }, { status: 500 })
   }
 
-  // On delivery completion, bump the rider's lifetime delivery count and
-  // credit their wallet with the delivery fee.
+  // On delivery completion, record the earning in the ledger. The wallet
+  // balance and the delivery count are maintained by a trigger on
+  // rider_transactions, so they always match the ledger.
+  //
+  // The insert runs as the service role on purpose: riders have no INSERT
+  // policy on rider_transactions, so the only way money reaches the ledger
+  // is through this route, which has already checked that the delivery
+  // belongs to the caller. Letting riders write their own ledger rows would
+  // let them credit themselves any amount.
   if (data.status === 'delivered') {
-    const { data: deliveryRow } = await supabase
+    const { data: deliveryRow, error: deliveryErr } = await supabase
       .from('deliveries')
       .select('id, delivery_fee, rider_id')
       .eq('id', data.delivery_id)
       .single()
 
-    if (deliveryRow) {
-      const { data: rider } = await supabase
-        .from('rider_profiles')
-        .select('wallet_balance, total_deliveries')
-        .eq('id', deliveryRow.rider_id)
-        .single()
+    if (deliveryErr || !deliveryRow) {
+      console.error('[delivery/update-status] could not read delivery for ledger:', deliveryErr)
+    } else {
+      const admin = createAdminClient()
 
-      if (rider) {
-        await supabase
-          .from('rider_profiles')
-          .update({
-            wallet_balance: rider.wallet_balance + deliveryRow.delivery_fee,
-            total_deliveries: rider.total_deliveries + 1,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', deliveryRow.rider_id)
+      // One earning per delivery, even if the request is replayed.
+      const { data: existing } = await admin
+        .from('rider_transactions')
+        .select('id')
+        .eq('delivery_id', deliveryRow.id)
+        .eq('type', 'earning')
+        .limit(1)
 
-        // Ledger entry, so the wallet page shows where the balance came from.
-        // The balance is credited here, so the transaction has to be written
-        // here too.
-        await supabase
-          .from('rider_transactions')
-          .insert({
-            rider_id: deliveryRow.rider_id,
-            type: 'earning',
-            amount: deliveryRow.delivery_fee,
-            description: 'Delivery completed',
-            delivery_id: deliveryRow.id ?? data.delivery_id,
-          })
+      if (!existing || existing.length === 0) {
+        const { error: ledgerErr } = await admin.from('rider_transactions').insert({
+          rider_id: deliveryRow.rider_id,
+          type: 'earning',
+          amount: deliveryRow.delivery_fee,
+          description: 'Delivery completed',
+          delivery_id: deliveryRow.id,
+        })
+
+        if (ledgerErr) {
+          console.error('[delivery/update-status] ledger insert failed:', ledgerErr)
+        }
       }
     }
   }
