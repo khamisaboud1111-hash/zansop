@@ -262,8 +262,8 @@ export default function SellerOrdersPage() {
                     </div>
                   </div>
 
-                  <div className="text-center">
-                    {order.status === 'packed' ? (
+                  <div className="text-center flex items-center justify-center gap-2">
+                    {order.status === 'packed' && (
                       <ReadyForPickupButton
                         orderId={order.id}
                         sellerId={seller!.id}
@@ -273,7 +273,13 @@ export default function SellerOrdersPage() {
                         deliveryAddress={order.delivery_address}
                         suggestedFee={order.delivery_fee}
                       />
-                    ) : next ? (
+                    )}
+                    {/* The actions panel (advance / cancel) is opened from this
+                        toggle. It used to be hidden for packed orders, where
+                        the dispatch button took its place, which left the
+                        "advance to out for delivery" button unreachable: a
+                        seller could never move a packed order forward. */}
+                    {next && (
                       <button
                         onClick={() => setActiveOrder(activeOrder?.id === order.id ? null : order)}
                         className="p-2 rounded-lg text-ink-400 hover:text-ink-600 hover:bg-ink-50 transition-colors"
@@ -281,7 +287,7 @@ export default function SellerOrdersPage() {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                    ) : null}
+                    )}
                   </div>
                 </div>
 
