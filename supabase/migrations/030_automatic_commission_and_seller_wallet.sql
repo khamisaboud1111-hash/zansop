@@ -1,4 +1,4 @@
--- 030: the platform takes its commission when the rider delivers
+﻿-- 030: the platform takes its commission when the rider delivers
 --
 -- Until now the commission was only a note: create_order wrote a row in
 -- commissions and left it unpaid, the seller dashboard invented a balance
@@ -221,6 +221,7 @@ declare
   v_gross integer;
   v_commission integer;
   v_rate numeric;
+  v_already_paid boolean;
 begin
   -- Only the move into 'delivered' counts, and only forwards.
   if new.status <> 'delivered' or old.status = 'delivered' then
@@ -252,21 +253,32 @@ begin
     set is_paid = true, paid_at = now()
     where order_id = new.id and seller_id = line.seller_id and is_paid = false;
 
-    -- And the seller gets the rest, on the record.
-    insert into public.seller_wallet_transactions (seller_id, order_id, type, amount, description)
-    values
-      (line.seller_id, new.id, 'sale', line.gross,
-       'Sale of order #' || upper(right(new.id::text, 8))),
-      (line.seller_id, new.id, 'commission', -v_commission,
-       'Platform commission on order #' || upper(right(new.id::text, 8)));
+    -- And the seller gets the rest, on the record. Only once: an order that
+    -- goes back and forth between statuses must not pay out twice, and
+    -- must not count the sale twice either.
+    select exists (
+      select 1 from public.seller_wallet_transactions w
+      where w.order_id = new.id
+        and w.seller_id = line.seller_id
+        and w.type = 'sale'
+    ) into v_already_paid;
 
-    perform public.set_trusted_update();
-    update public.sellers
-    set total_revenue = coalesce(total_revenue, 0) + line.gross,
-        total_sales = coalesce(total_sales, 0) + line.quantity,
-        updated_at = now()
-    where id = line.seller_id;
-    perform public.clear_trusted_update();
+    if not v_already_paid then
+      insert into public.seller_wallet_transactions (seller_id, order_id, type, amount, description)
+      values
+        (line.seller_id, new.id, 'sale', line.gross,
+         'Sale of order #' || upper(right(new.id::text, 8))),
+        (line.seller_id, new.id, 'commission', -v_commission,
+         'Platform commission on order #' || upper(right(new.id::text, 8)));
+
+      perform public.set_trusted_update();
+      update public.sellers
+      set total_revenue = coalesce(total_revenue, 0) + line.gross,
+          total_sales = coalesce(total_sales, 0) + line.quantity,
+          updated_at = now()
+      where id = line.seller_id;
+      perform public.clear_trusted_update();
+    end if;
   end loop;
 
   return new;
