@@ -28,6 +28,71 @@ export const POST = withValidation(readyForPickupSchema, async (data) => {
 
   const pickupGeo = `POINT(${data.pickup_lng} ${data.pickup_lat})`
 
+  // An order can only have one live delivery. Pressing "find rider" again
+  // on an order that already has an open delivery used to insert a second
+  // one, which put a duplicate job on the rider board and left the seller
+  // with two deliveries for the same order. Reuse the open delivery instead
+  // and just retry the rider lookup.
+  const { data: existing, error: existingErr } = await supabase
+    .from('deliveries')
+    .select('*')
+    .eq('order_id', data.order_id)
+    .in('status', ['pending_dispatch', 'accepted', 'picked_up'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+
+  if (existingErr) {
+    console.error('[dispatch] existing lookup error:', existingErr)
+  }
+
+  const openDelivery = existing && existing.length > 0 ? existing[0] : null
+
+  if (openDelivery) {
+    // Still waiting for a rider: try to assign one now.
+    if (!openDelivery.rider_id) {
+      const { data: nearest, error: rpcError } = await supabase.rpc('find_nearest_available_rider', {
+        pickup_geo: pickupGeo,
+        exclusion_list: [],
+      })
+
+      if (!rpcError) {
+        const riderMatch = Array.isArray(nearest) ? nearest[0] : null
+        if (riderMatch) {
+          const { data: claimed } = await supabase
+            .from('deliveries')
+            .update({
+              rider_id: riderMatch.rider_id,
+              distance_meters: riderMatch.distance_meters
+                ? Math.round(riderMatch.distance_meters)
+                : null,
+              timeout_expires_at: new Date(
+                Date.now() + DISPATCH_TIMEOUT_SECONDS * 1000
+              ).toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', openDelivery.id)
+            .is('rider_id', null)
+            .select()
+            .maybeSingle()
+
+          return NextResponse.json({
+            delivery: claimed ?? openDelivery,
+            rider_found: Boolean(claimed),
+            timeout_seconds: claimed ? DISPATCH_TIMEOUT_SECONDS : null,
+            reused: true,
+          })
+        }
+      }
+    }
+
+    return NextResponse.json({
+      delivery: openDelivery,
+      rider_found: Boolean(openDelivery.rider_id),
+      timeout_seconds: openDelivery.rider_id ? DISPATCH_TIMEOUT_SECONDS : null,
+      reused: true,
+    })
+  }
+
   // 1. Find nearest available rider via the PostGIS RPC from Phase 8.
   const { data: nearest, error: rpcError } = await supabase.rpc('find_nearest_available_rider', {
     pickup_geo: pickupGeo,
