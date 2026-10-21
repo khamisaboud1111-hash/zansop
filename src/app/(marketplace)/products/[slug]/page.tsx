@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Star, BadgeCheck } from 'lucide-react'
 import ProductCard from '@/components/product/ProductCard'
+import { ProductReviewList } from '@/components/reviews/ReviewLists'
 import LText from '@/components/shared/LText'
 import TrackView from './TrackView'
 import RecentlyViewedRow from './RecentlyViewedRow'
@@ -192,9 +193,7 @@ export default async function ProductPage({ params }: Props) {
           <h2 className="font-display font-bold text-xl text-foreground mb-4">
             <LText k="customerReviews" /> ({product.review_count})
           </h2>
-          <div className="bg-card border border-border p-8 text-center">
-            <p className="text-muted-foreground text-sm"><LText k="noReviewsPrompt" /></p>
-          </div>
+          <ProductReviewList productId={product.id} />
         </section>
 
         {/* Related products */}

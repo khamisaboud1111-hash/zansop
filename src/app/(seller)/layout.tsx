@@ -3,7 +3,7 @@
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import Link from 'next/link'
-import { LayoutDashboard, Package, ShoppingBag, BarChart2, Settings, ArrowLeft, ShieldCheck, MessageCircle, Bell } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingBag, BarChart2, Settings, ArrowLeft, ShieldCheck, MessageCircle, Bell, Star, Wallet } from 'lucide-react'
 import { useUser } from '@/hooks/useUser'
 import { useSeller } from '@/hooks/useSeller'
 import { PageLoader } from '@/components/ui'
@@ -15,6 +15,8 @@ const NAV = [
   { href: '/seller/products',   label: 'Bidhaa',    icon: Package },
   { href: '/seller/orders',     label: 'Maagizo',   icon: ShoppingBag },
   { href: '/seller/messages',   label: 'Ujumbe',    icon: MessageCircle },
+  { href: '/seller/reviews',    label: 'Maoni',     icon: Star },
+  { href: '/seller/wallet',     label: 'Pochi',     icon: Wallet },
   { href: '/seller/notifications', label: 'Uzoefu', icon: Bell },
   { href: '/seller/analytics',  label: 'Takwimu',   icon: BarChart2 },
   { href: '/seller/verification', label: 'Uthibitisho', icon: ShieldCheck },

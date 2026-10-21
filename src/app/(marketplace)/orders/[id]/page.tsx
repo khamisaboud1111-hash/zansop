@@ -9,6 +9,7 @@ import LText from '@/components/shared/LText'
 import { PageHeader } from '@/components/shared/PageHeader'
 import PayNowButton from '@/components/order/PayNowButton'
 import DeliveryRatingSection from '@/components/delivery/DeliveryRatingSection'
+import OrderReviewSection from '@/components/reviews/OrderReviewSection'
 import OrderLiveMapSection from '@/components/delivery/OrderLiveMapSection'
 import { WhatsAppTrackingButton } from '@/components/order/WhatsAppTrackingButton'
 
@@ -21,7 +22,7 @@ export default async function OrderPage({ params }: { params: { id: string } }) 
     .from('orders')
     .select(`
       *,
-      items:order_items(*, product:products(*, images:product_images(*))),
+      items:order_items(*, product:products(*, images:product_images(*)), seller:sellers(store_name)),
       tracking:order_tracking(* order: created_at asc)
     `)
     .eq('id', params.id)
@@ -127,6 +128,19 @@ export default async function OrderPage({ params }: { params: { id: string } }) 
           <div className="mt-4">
             <DeliveryRatingSection orderId={order.id} reviewerId={order.buyer_id} reviewerRole="buyer" />
           </div>
+        )}
+
+        {order.status === 'delivered' && (
+          <OrderReviewSection
+            orderId={order.id}
+            buyerId={order.buyer_id}
+            items={(order.items ?? []).map((item: any) => ({
+              product_id: item.product_id,
+              product_name: item.product?.name ?? '',
+              seller_id: item.seller_id,
+              seller_name: item.seller?.store_name ?? '',
+            }))}
+          />
         )}
       </div>
     </main>

@@ -5,6 +5,7 @@ import { BadgeCheck, Star, Package, MessageCircle, MapPin, TrendingUp } from 'lu
 import KikoiStripe from '@/components/shared/KikoiStripe'
 import ProductCard from '@/components/product/ProductCard'
 import LText from '@/components/shared/LText'
+import { SellerReviewList } from '@/components/reviews/ReviewLists'
 import { whatsappUrl } from '@/utils'
 import type { Metadata } from 'next'
 
@@ -141,6 +142,12 @@ export default async function SellerStorePage({ params }: Props) {
             {products.map((p: any) => <ProductCard key={p.id} product={p} />)}
           </div>
         )}
+
+        {/* Customer reviews of the shop */}
+        <h2 className="font-display font-bold text-lg text-ink-900 dark:text-white mt-10 mb-4">
+          <LText k="customerReviews" /> ({seller.review_count})
+        </h2>
+        <SellerReviewList sellerId={seller.id} />
       </div>
     </main>
   )

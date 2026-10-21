@@ -151,8 +151,23 @@ export async function GET(request: NextRequest) {
     // Inventory value
     const inventoryValue = products.reduce((s: number, p: any) => s + (p.price * p.stock_quantity), 0)
 
-    // Wallet balance
-    const calculatedWalletBalance = totalRevenue * 0.9 - unpaidCommissions
+    // Wallet balance - what the seller actually has. It is the sum of the
+    // wallet ledger: the sales they made, less the platform's commission and
+    // anything they have withdrawn. It used to be guessed here from
+    // "revenue * 0.9 - unpaid commissions", which did not match the money.
+    const { data: walletRows } = await supabase
+      .from('seller_wallet_transactions')
+      .select('amount, type')
+      .eq('seller_id', seller.id)
+
+    const calculatedWalletBalance = (walletRows ?? []).reduce(
+      (sum: number, row: any) => sum + (row.amount ?? 0),
+      0
+    )
+
+    const withdrawn = (walletRows ?? [])
+      .filter((row: any) => row.type === 'withdrawal')
+      .reduce((sum: number, row: any) => sum + Math.abs(row.amount ?? 0), 0)
 
     // Conversion rate (mock - would need buyer data)
     const conversionRate = 0.12
@@ -171,7 +186,7 @@ export async function GET(request: NextRequest) {
       recentRevenue,
       inventoryValue,
       walletBalance: calculatedWalletBalance,
-      pendingWithdrawals: calculatedWalletBalance * 0.15,
+      pendingWithdrawals: withdrawn,
     }
 
     return NextResponse.json({ stats }, {
