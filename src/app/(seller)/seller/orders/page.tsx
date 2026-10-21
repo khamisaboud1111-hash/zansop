@@ -14,7 +14,7 @@ import toast from 'react-hot-toast'
 import ReadyForPickupButton from '@/components/seller/ReadyForPickupButton'
 import DeliveryRatingSection from '@/components/delivery/DeliveryRatingSection'
 import { DismissibleAlert } from '@/components/shared/DismissibleAlert'
-import { VirtualList } from '@/components/shared/VirtualList'
+import { AutoVirtualList } from '@/components/shared/VirtualList'
 
 const NEXT_STATUS: Record<string, OrderStatus> = {
   pending: 'confirmed', confirmed: 'packed', packed: 'out_for_delivery', out_for_delivery: 'delivered',
@@ -50,7 +50,14 @@ export default function SellerOrdersPage() {
   const [selectedOrders, setSelectedOrders] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
 
-  const { data, isLoading, refetch, updateOrderStatus, bulkUpdateOrders } = useOrders(seller?.id ?? null)
+  // useOrders takes a params object, not a seller id. Passing the id made
+  // params.search resolve to String.prototype.search, so the API was called
+  // with ?search=function search() { [native code] } and answered 500, which
+  // left the page showing "0 maagizo". The status mutations live in their
+  // own hooks.
+  const { data, isLoading, refetch } = useOrders()
+  const updateOrderStatus = useUpdateOrderStatus()
+  const bulkUpdateOrders = useBulkUpdateOrders()
   
   const orders = data?.orders ?? []
   const pagination = data?.pagination ?? { page: 1, limit: 20, total: 0, totalPages: 0 }
@@ -195,8 +202,10 @@ export default function SellerOrdersPage() {
           <div className="text-center">Vitendo</div>
         </div>
 
-        {/* Order Cards - VirtualList */}
-        <VirtualList
+        {/* Order Cards - AutoVirtualList measures the container itself.
+            VirtualList needs an explicit containerHeight, and without one the
+            visible range is NaN so no order is ever rendered. */}
+        <AutoVirtualList
           items={filteredOrders}
           itemHeight={280}
           renderItem={(order) => {
