@@ -300,9 +300,12 @@ export default function SellerDashboardPage() {
                       <p className="font-semibold text-ink-900 dark:text-white">{formatTZS(stats.walletBalance)}</p>
                     </div>
                   </div>
-                  <button className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg transition-colors">
+                  <Link
+                    href="/seller/wallet"
+                    className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg transition-colors"
+                  >
                     Withdraw
-                  </button>
+                  </Link>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl">
                   <div className="flex items-center gap-3">
@@ -311,12 +314,15 @@ export default function SellerDashboardPage() {
                     </div>
                     <div>
                       <p className="text-xs text-ink-500 dark:text-ink-400">Pending Payouts</p>
-                      <p className="font-semibold text-ink-900 dark:text-white">${stats.unpaidCommissions.toFixed(2)}</p>
+                      <p className="font-semibold text-ink-900 dark:text-white">{formatTZS(stats.unpaidCommissions)}</p>
                     </div>
                   </div>
-                  <button className="text-xs bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg transition-colors">
+                  <Link
+                    href="/seller/wallet"
+                    className="text-xs bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg transition-colors"
+                  >
                     View Details
-                  </button>
+                  </Link>
                 </div>
               </div>
             )}

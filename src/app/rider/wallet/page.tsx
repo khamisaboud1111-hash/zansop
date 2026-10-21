@@ -78,18 +78,31 @@ export default function RiderWalletPage() {
     }
     setWithdrawing(true)
     try {
-      const { error } = await supabase.from('rider_withdrawals').insert({
-        rider_id: profile!.id,
-        amount,
-        status: 'pending',
-        method: payoutMethod || 'mpesa',
-        account_number: payoutAccountNumber || '',
+      // The server takes the money out of the balance and records the
+      // request. Doing it from here left the balance untouched, so the
+      // same money could be asked for again and again.
+      const res = await fetch('/api/rider/wallet/withdraw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount,
+          account_number: payoutAccountNumber || '',
+          method: payoutMethod || 'mpesa',
+        }),
       })
-      if (error) throw error
+      const json = await res.json()
+      if (!res.ok) {
+        toast.error(json.error || 'Imeshindikana kutuma ombi')
+        return
+      }
       toast.success('Ombi la kutoa pesa limetumwa')
       setWithdrawAmount('')
       setShowWithdrawForm(false)
-      const { data } = await supabase.from('rider_withdrawals').select('*').eq('rider_id', profile!.id).order('created_at', { ascending: false }).limit(20)
+      const [{ data: txns }, { data }] = await Promise.all([
+        supabase.from('rider_transactions').select('*').eq('rider_id', profile!.id).order('created_at', { ascending: false }).limit(50),
+        supabase.from('rider_withdrawals').select('*').eq('rider_id', profile!.id).order('created_at', { ascending: false }).limit(20),
+      ])
+      setTransactions((txns ?? []) as Transaction[])
       setWithdrawals((data ?? []) as WithdrawalRequest[])
     } catch {
       toast.error('Imeshindikana kutuma ombi')
