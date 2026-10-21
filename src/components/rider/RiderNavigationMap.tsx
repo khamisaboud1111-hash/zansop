@@ -161,6 +161,17 @@ export function RiderNavigationMap({
     return () => navigator.geolocation.clearWatch(watchId)
   }, [])
 
+  // The destination is compared by value, not by object identity. The parent
+  // builds a new object for the pickup/drop-off coordinates on every render,
+  // so comparing the objects re-ran the routing request on every render of
+  // the dashboard - it removed and re-added the routing control while a
+  // request was still in flight, which is what pushed the map into an error
+  // state and took the rider's screen down with it.
+  const destLat = activeDestination?.lat
+  const destLng = activeDestination?.lng
+  const startLat = riderLocation?.lat ?? pickupLocation.lat
+  const startLng = riderLocation?.lng ?? pickupLocation.lng
+
   const lastRoutedDestRef = useRef<{ lat: number; lng: number } | null>(null)
   const lastRiderPosRef = useRef<{ lat: number; lng: number } | null>(null)
 
@@ -194,6 +205,10 @@ export function RiderNavigationMap({
       })
 
       routingControl.on('routesfound', (e: RoutesFoundEvent) => {
+        // The map can be torn down while the route request is still running.
+        // Updating state after that throws inside React and takes the page
+        // down, so the result is dropped instead.
+        if (!leafletMapRef.current) return
         setIsCalculatingRoute(false)
         const summary = e.routes[0]?.summary
         if (summary) {
@@ -213,6 +228,7 @@ export function RiderNavigationMap({
       })
 
       routingControl.on('routingerror', () => {
+        if (!leafletMapRef.current) return
         setIsCalculatingRoute(false)
         setRouteError(true)
         if (process.env.NODE_ENV === 'development') {
@@ -231,8 +247,10 @@ export function RiderNavigationMap({
   }, [])
 
   useEffect(() => {
-    const startPoint = riderLocation || pickupLocation
-    const endPoint = activeDestination
+    if (destLat === undefined || destLng === undefined) return
+
+    const startPoint = { lat: startLat, lng: startLng }
+    const endPoint = { lat: destLat, lng: destLng }
 
     const hasDestinationChanged =
       !lastRoutedDestRef.current ||
@@ -248,7 +266,7 @@ export function RiderNavigationMap({
     if (hasDestinationChanged || hasSignificantDeviation) {
       calculateRoute(startPoint, endPoint)
     }
-  }, [riderLocation, activeDestination, pickupLocation, calculateRoute])
+  }, [startLat, startLng, destLat, destLng, calculateRoute])
 
   useEffect(() => {
     const map = leafletMapRef.current

@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { cn } from '@/utils'
 
@@ -76,7 +77,25 @@ interface Props {
 }
 
 export default function UngujaIllustration({ compact = false, className }: Props) {
-  const reduce = useReducedMotion() ?? false
+  // useReducedMotion() has no value on the server - it can only read the media
+  // query in the browser. Taking it at face value meant the server rendered
+  // the illustration with reduced motion OFF while a visitor whose system
+  // asks for reduced motion got the reduced version on their first render.
+  // The markup differs (the route dash and the pulsing marker are dropped),
+  // so React threw a hydration error and threw the server HTML away on
+  // every onboarding page load.
+  //
+  // Reading the preference only after mount keeps the first client render
+  // identical to the server render, and the animation still adapts a tick
+  // later.
+  const prefersReducedMotion = useReducedMotion()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const reduce = mounted && prefersReducedMotion === true
 
   return (
     <div

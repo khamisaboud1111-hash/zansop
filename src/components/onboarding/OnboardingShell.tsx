@@ -57,16 +57,19 @@ export default function OnboardingShell({ children }: { children: React.ReactNod
           {/* drifting light blobs */}
           <motion.div
             className="absolute -left-[12%] -top-[18%] h-[62vh] w-[62vh] rounded-full bg-brand-500/25 blur-3xl"
+            initial={{ opacity: 0.45, scale: 1 }}
             animate={{ opacity: [0.45, 0.8, 0.45], scale: [1, 1.15, 1] }}
             transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
           />
           <motion.div
             className="absolute -right-[14%] top-[8%] h-[56vh] w-[56vh] rounded-full bg-cyan-400/20 blur-3xl"
+            initial={{ opacity: 0.35, scale: 1.1 }}
             animate={{ opacity: [0.35, 0.7, 0.35], scale: [1.1, 1, 1.1] }}
             transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
           />
           <motion.div
             className="absolute -bottom-[26%] left-[28%] h-[52vh] w-[52vh] rounded-full bg-amber-300/10 blur-3xl"
+            initial={{ opacity: 0.3, scale: 1 }}
             animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.2, 1] }}
             transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
           />

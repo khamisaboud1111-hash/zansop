@@ -49,7 +49,12 @@ const nextConfig = {
               // realtime socket is wss://*.supabase.co and is NOT covered by
               // https://*.supabase.co. Without it every realtime subscription
               // (chat messages, notifications) is blocked by the browser.
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org https://server.arcgisonline.com",
+              //
+              // router.project-osrm.org is the routing service the rider
+              // navigation map calls for turn-by-turn directions. It was not
+              // listed, so the browser blocked every route request and the
+              // rider only ever saw "failed to calculate route".
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org https://server.arcgisonline.com https://router.project-osrm.org",
               "frame-ancestors 'none'",
             ].join('; '),
           },
