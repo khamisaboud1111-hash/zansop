@@ -23,13 +23,22 @@ export default async function OrderPage({ params }: { params: { id: string } }) 
     .select(`
       *,
       items:order_items(*, product:products(*, images:product_images(*)), seller:sellers(store_name)),
-      tracking:order_tracking(* order: created_at asc)
+      tracking:order_tracking(*)
     `)
     .eq('id', params.id)
     .eq('buyer_id', user.id)
     .single() as { data: any }
 
   if (!order) notFound()
+
+  // PostgREST no longer accepts "order:" inside an embed, so the tracking
+  // rows are sorted here. Without this the whole select failed to parse and
+  // the page answered 404 for every order.
+  if (Array.isArray(order.tracking)) {
+    order.tracking = [...order.tracking].sort(
+      (a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    )
+  }
 
   const zone = DELIVERY_ZONES[order.delivery_zone as keyof typeof DELIVERY_ZONES]
   const payment = PAYMENT_METHODS.find((p) => p.id === order.payment_method)
