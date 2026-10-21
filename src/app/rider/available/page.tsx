@@ -22,7 +22,7 @@ interface AvailableDelivery {
   customer_rating?: number
   delivery_type: 'express' | 'standard'
   created_at: string
-  status: 'available'
+  status: 'pending_dispatch'
 }
 
 type FilterType = 'all' | 'express' | 'standard' | 'nearest'
@@ -49,13 +49,21 @@ export default function RiderAvailablePage() {
         )
       }
 
+      // The job board is the unassigned deliveries waiting for a rider.
+      // The status value is 'pending_dispatch' (the delivery_status enum has
+      // no 'available'), and the customer name comes from the order - there
+      // is no customer_name column on deliveries.
       const { data } = await supabase
         .from('deliveries')
-        .select('id, pickup_address, delivery_address, delivery_fee, distance_meters, created_at, status, delivery_type, customer_name, customer_rating')
-        .eq('status', 'available')
+        .select('id, pickup_address, delivery_address, delivery_fee, distance_meters, created_at, status, delivery_type, order:orders!deliveries_order_id_fkey(delivery_name, buyer:profiles(full_name))')
+        .eq('status', 'pending_dispatch')
+        .is('rider_id', null)
         .order('created_at', { ascending: false })
         .limit(50)
-      setDeliveries((data ?? []) as AvailableDelivery[])
+      setDeliveries(((data ?? []) as any[]).map((d) => ({
+        ...d,
+        customer_name: d.order?.buyer?.full_name ?? d.order?.delivery_name ?? undefined,
+      })) as AvailableDelivery[])
       setLoading(false)
     }
     load()
@@ -102,11 +110,9 @@ export default function RiderAvailablePage() {
   async function requestDelivery(deliveryId: string) {
     if (!profile) return
     try {
-      const { error } = await supabase
-        .from('deliveries')
-        .update({ status: 'accepted', rider_id: profile.id, accepted_at: new Date().toISOString() })
-        .eq('id', deliveryId)
-        .eq('status', 'available')
+      // claim_delivery locks the row and assigns it atomically, so two
+      // riders cannot both take the same job.
+      const { error } = await supabase.rpc('claim_delivery', { p_delivery_id: deliveryId })
       if (error) throw error
       setDeliveries(prev => prev.filter(d => d.id !== deliveryId))
       toast.success(t('deliveryAccepted', lang))

@@ -51,7 +51,7 @@ export const POST = withValidation(updateDeliveryStatusSchema, async (data) => {
   if (data.status === 'delivered') {
     const { data: deliveryRow } = await supabase
       .from('deliveries')
-      .select('delivery_fee, rider_id')
+      .select('id, delivery_fee, rider_id')
       .eq('id', data.delivery_id)
       .single()
 
@@ -71,6 +71,19 @@ export const POST = withValidation(updateDeliveryStatusSchema, async (data) => {
             updated_at: new Date().toISOString(),
           })
           .eq('id', deliveryRow.rider_id)
+
+        // Ledger entry, so the wallet page shows where the balance came from.
+        // The balance is credited here, so the transaction has to be written
+        // here too.
+        await supabase
+          .from('rider_transactions')
+          .insert({
+            rider_id: deliveryRow.rider_id,
+            type: 'earning',
+            amount: deliveryRow.delivery_fee,
+            description: 'Delivery completed',
+            delivery_id: deliveryRow.id ?? data.delivery_id,
+          })
       }
     }
   }

@@ -135,7 +135,7 @@ export default function RiderDashboardPage() {
     const channel = supabase
       .channel(`rider-profile-changes-${profile.id}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'rider_profiles', filter: `id=eq.${profile.id}` },
-        (payload) => setRiderProfile(payload.new as RiderProfileRow))
+        (payload: { new: unknown }) => setRiderProfile(payload.new as RiderProfileRow))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [profile, supabase])
@@ -151,7 +151,7 @@ export default function RiderDashboardPage() {
 
   useEffect(() => {
     if (!activeDeliveryId || !profile) { setActiveDelivery(null); return }
-    supabase.rpc('get_active_delivery_for_rider', { p_rider_id: profile.id }).then(({ data, error }) => {
+    supabase.rpc('get_active_delivery_for_rider', { p_rider_id: profile.id }).then(({ data, error }: { data: unknown; error: { message: string } | null }) => {
       if (error) { toast.error(t('failedToGetTrip', lang)); return }
       const row = Array.isArray(data) ? data[0] : null
       setActiveDelivery(row ?? null)

@@ -22,6 +22,7 @@ interface DeliveryRecord {
   delivered_at: string | null
   created_at: string
   buyer?: { full_name: string } | null
+  customer_name?: string | null
   seller?: { store_name: string } | null
   rider_rating?: number | null
 }
@@ -41,13 +42,19 @@ export default function RiderDeliveriesPage() {
     if (!profile) return
     async function load() {
       setLoading(true)
+      // deliveries has no buyer_id column - the customer comes from the
+      // order, so the profiles embed has to go through orders.
       const { data } = await supabase
         .from('deliveries')
-        .select('*, buyer:profiles!deliveries_buyer_id_fkey(full_name), seller:sellers(store_name)')
+        .select('*, order:orders!deliveries_order_id_fkey(delivery_name, buyer:profiles(full_name)), seller:sellers(store_name)')
         .eq('rider_id', profile!.id)
         .order('delivered_at', { ascending: false })
         .limit(200)
-      setDeliveries((data ?? []) as DeliveryRecord[])
+      setDeliveries(((data ?? []) as any[]).map((d) => ({
+        ...d,
+        buyer: d.order?.buyer ?? null,
+        customer_name: d.order?.delivery_name ?? d.order?.buyer?.full_name ?? null,
+      })) as DeliveryRecord[])
       setLoading(false)
     }
     load()
