@@ -46,7 +46,10 @@ export async function POST(req: NextRequest) {
   // or seller_id.
   const { data, error } = await supabase.rpc('create_order', {
     p_buyer_id: user.id,
-    p_items: JSON.stringify(body.items.map((i) => ({ product_id: i.product_id, quantity: i.quantity }))),
+    // Must be the array itself, not JSON.stringify(...): p_items is jsonb, and
+    // a stringified array arrives as a jsonb *string*, so the function's
+    // jsonb_typeof(p_items) = 'array' check fails with "Cart is empty".
+    p_items: body.items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
     p_delivery_zone: body.delivery_zone,
     p_delivery_address: body.delivery_address,
     p_delivery_name: body.delivery_name,

@@ -372,3 +372,49 @@ create policy "System can insert notifications" on notifications for insert with
 create policy "Sellers view own commissions" on commissions for select
   using (seller_id in (select id from sellers where user_id = auth.uid()) or is_admin());
 create policy "Admins manage commissions" on commissions for all using (is_admin());
+
+-- Data API grants.
+-- Supabase stops auto-granting Data API access to new public tables on
+-- 2026-10-30, so every table this migration creates is granted explicitly.
+-- Without these the API answers 'permission denied' and the app breaks on
+-- fresh projects, preview branches and 'supabase db reset'.
+grant select on public.profiles to anon;
+grant select, insert, update, delete on public.profiles to authenticated;
+grant select, insert, update, delete on public.profiles to service_role;
+grant select on public.categories to anon;
+grant select, insert, update, delete on public.categories to authenticated;
+grant select, insert, update, delete on public.categories to service_role;
+grant select on public.delivery_zones to anon;
+grant select, insert, update, delete on public.delivery_zones to authenticated;
+grant select, insert, update, delete on public.delivery_zones to service_role;
+grant select on public.sellers to anon;
+grant select, insert, update, delete on public.sellers to authenticated;
+grant select, insert, update, delete on public.sellers to service_role;
+grant select on public.products to anon;
+grant select, insert, update, delete on public.products to authenticated;
+grant select, insert, update, delete on public.products to service_role;
+grant select on public.product_images to anon;
+grant select, insert, update, delete on public.product_images to authenticated;
+grant select, insert, update, delete on public.product_images to service_role;
+grant select on public.orders to anon;
+grant select, insert, update, delete on public.orders to authenticated;
+grant select, insert, update, delete on public.orders to service_role;
+grant select on public.order_items to anon;
+grant select, insert, update, delete on public.order_items to authenticated;
+grant select, insert, update, delete on public.order_items to service_role;
+grant select on public.order_tracking to anon;
+grant select, insert, update, delete on public.order_tracking to authenticated;
+grant select, insert, update, delete on public.order_tracking to service_role;
+grant select on public.commissions to anon;
+grant select, insert, update, delete on public.commissions to authenticated;
+grant select, insert, update, delete on public.commissions to service_role;
+grant select on public.reviews to anon;
+grant select, insert, update, delete on public.reviews to authenticated;
+grant select, insert, update, delete on public.reviews to service_role;
+grant select on public.wishlists to anon;
+grant select, insert, update, delete on public.wishlists to authenticated;
+grant select, insert, update, delete on public.wishlists to service_role;
+grant select on public.notifications to anon;
+grant select, insert, update, delete on public.notifications to authenticated;
+grant select, insert, update, delete on public.notifications to service_role;
+

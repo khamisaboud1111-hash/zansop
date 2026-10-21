@@ -40,7 +40,7 @@ export class ErrorBoundary extends Component<Props, State> {
               title="Kitu kimekosea"
               description={this.state.error?.message || "Samahani, hitilafu imetokea."}
               retryLabel="Jaribu tena"
-              onClick={() => this.setState({ hasError: false, error: null })}
+              onRetry={() => this.setState({ hasError: false, error: null })}
             />
           </div>
         </div>

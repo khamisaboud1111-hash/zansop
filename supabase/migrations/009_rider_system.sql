@@ -183,3 +183,27 @@ grant execute on function get_rider_metrics(uuid) to authenticated;
 grant execute on function get_active_delivery_for_rider(uuid) to authenticated;
 grant execute on function list_online_riders(numeric, numeric, integer) to authenticated;
 grant execute on function get_active_delivery_for_order(uuid) to authenticated;
+-- Data API grants.
+-- Supabase stops auto-granting Data API access to new public tables on
+-- 2026-10-30, so every table this migration creates is granted explicitly.
+-- Without these the API answers 'permission denied' and the app breaks on
+-- fresh projects, preview branches and 'supabase db reset'.
+grant select on public.rider_profiles to anon;
+grant select, insert, update, delete on public.rider_profiles to authenticated;
+grant select, insert, update, delete on public.rider_profiles to service_role;
+grant select on public.rider_documents to anon;
+grant select, insert, update, delete on public.rider_documents to authenticated;
+grant select, insert, update, delete on public.rider_documents to service_role;
+grant select on public.deliveries to anon;
+grant select, insert, update, delete on public.deliveries to authenticated;
+grant select, insert, update, delete on public.deliveries to service_role;
+grant select on public.rider_reviews to anon;
+grant select, insert, update, delete on public.rider_reviews to authenticated;
+grant select, insert, update, delete on public.rider_reviews to service_role;
+grant select on public.rider_public_status to anon;
+grant select, insert, update, delete on public.rider_public_status to authenticated;
+grant select, insert, update, delete on public.rider_public_status to service_role;
+grant select on public.rider_earnings to anon;
+grant select, insert, update, delete on public.rider_earnings to authenticated;
+grant select, insert, update, delete on public.rider_earnings to service_role;
+

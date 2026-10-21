@@ -221,3 +221,31 @@ returns boolean language sql stable as $$
       )
   );
 $$;
+
+-- Data API grants.
+-- Supabase stops auto-granting Data API access to new public tables on
+-- 2026-10-30, so every table this migration creates is granted explicitly.
+-- Without these the API answers 'permission denied' and the app breaks on
+-- fresh projects, preview branches and 'supabase db reset'.
+grant select on public.product_videos to anon;
+grant select, insert, update, delete on public.product_videos to authenticated;
+grant select, insert, update, delete on public.product_videos to service_role;
+grant select on public.seller_verification_documents to anon;
+grant select, insert, update, delete on public.seller_verification_documents to authenticated;
+grant select, insert, update, delete on public.seller_verification_documents to service_role;
+grant select on public.payment_transactions to anon;
+grant select, insert, update, delete on public.payment_transactions to authenticated;
+grant select, insert, update, delete on public.payment_transactions to service_role;
+grant select on public.delivery_tracking_events to anon;
+grant select, insert, update, delete on public.delivery_tracking_events to authenticated;
+grant select, insert, update, delete on public.delivery_tracking_events to service_role;
+grant select on public.recently_viewed to anon;
+grant select, insert, update, delete on public.recently_viewed to authenticated;
+grant select, insert, update, delete on public.recently_viewed to service_role;
+grant select on public.testimonials to anon;
+grant select, insert, update, delete on public.testimonials to authenticated;
+grant select, insert, update, delete on public.testimonials to service_role;
+grant select on public.policy_pages to anon;
+grant select, insert, update, delete on public.policy_pages to authenticated;
+grant select, insert, update, delete on public.policy_pages to service_role;
+

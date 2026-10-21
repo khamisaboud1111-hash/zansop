@@ -314,3 +314,21 @@ grant execute on function toggle_video_like(uuid) to authenticated;
 grant execute on function record_video_view(uuid, integer, text) to authenticated;
 grant execute on function add_video_comment(uuid, text, uuid) to authenticated;
 grant execute on function get_video_comments(uuid, integer, timestamptz) to authenticated;
+-- Data API grants.
+-- Supabase stops auto-granting Data API access to new public tables on
+-- 2026-10-30, so every table this migration creates is granted explicitly.
+-- Without these the API answers 'permission denied' and the app breaks on
+-- fresh projects, preview branches and 'supabase db reset'.
+grant select on public.product_videos to anon;
+grant select, insert, update, delete on public.product_videos to authenticated;
+grant select, insert, update, delete on public.product_videos to service_role;
+grant select on public.video_likes to anon;
+grant select, insert, update, delete on public.video_likes to authenticated;
+grant select, insert, update, delete on public.video_likes to service_role;
+grant select on public.video_comments to anon;
+grant select, insert, update, delete on public.video_comments to authenticated;
+grant select, insert, update, delete on public.video_comments to service_role;
+grant select on public.video_views to anon;
+grant select, insert, update, delete on public.video_views to authenticated;
+grant select, insert, update, delete on public.video_views to service_role;
+

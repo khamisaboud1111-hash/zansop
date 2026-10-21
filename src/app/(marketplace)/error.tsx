@@ -21,7 +21,7 @@ export default function MarketplaceError({
           title="Kitu kimekosea"
           description="Samahani, hitilafu imetokea wakati wa kupakia duka."
           retryLabel="Jaribu tena"
-          onClick={reset}
+          onRetry={reset}
         />
         {error.digest && (
           <p className="text-center text-xs text-ink-400 dark:text-ink-500 mt-4 font-mono">

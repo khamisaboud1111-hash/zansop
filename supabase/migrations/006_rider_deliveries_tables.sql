@@ -125,3 +125,16 @@ end;
 $$;
 
 grant execute on function list_online_riders() to authenticated;
+
+-- Data API grants.
+-- Supabase stops auto-granting Data API access to new public tables on
+-- 2026-10-30, so every table this migration creates is granted explicitly.
+-- Without these the API answers 'permission denied' and the app breaks on
+-- fresh projects, preview branches and 'supabase db reset'.
+grant select on public.rider_profiles to anon;
+grant select, insert, update, delete on public.rider_profiles to authenticated;
+grant select, insert, update, delete on public.rider_profiles to service_role;
+grant select on public.deliveries to anon;
+grant select, insert, update, delete on public.deliveries to authenticated;
+grant select, insert, update, delete on public.deliveries to service_role;
+

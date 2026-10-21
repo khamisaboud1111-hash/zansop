@@ -273,3 +273,15 @@ grant execute on function get_chat_rooms(uuid) to authenticated;
 grant execute on function get_messages(uuid, integer, timestamptz) to authenticated;
 grant execute on function send_message(uuid, text, text, text) to authenticated;
 grant execute on function mark_messages_read(uuid) to authenticated;
+-- Data API grants.
+-- Supabase stops auto-granting Data API access to new public tables on
+-- 2026-10-30, so every table this migration creates is granted explicitly.
+-- Without these the API answers 'permission denied' and the app breaks on
+-- fresh projects, preview branches and 'supabase db reset'.
+grant select on public.chat_rooms to anon;
+grant select, insert, update, delete on public.chat_rooms to authenticated;
+grant select, insert, update, delete on public.chat_rooms to service_role;
+grant select on public.messages to anon;
+grant select, insert, update, delete on public.messages to authenticated;
+grant select, insert, update, delete on public.messages to service_role;
+

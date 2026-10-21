@@ -41,7 +41,7 @@ export class SectionErrorBoundary extends Component<Props, State> {
               title={t('somethingWentWrong', lang)}
               description={this.state.error?.message || t('errorOccurred', lang)}
               retryLabel={t('tryAgain', lang)}
-              onClick={() => this.setState({ hasError: false, error: null })}
+              onRetry={() => this.setState({ hasError: false, error: null })}
             />
           </div>
         </div>
