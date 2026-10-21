@@ -38,12 +38,19 @@ export default function DeliveryRatingSection({ orderId, reviewerId, reviewerRol
   async function load() {
     setLoading(true)
 
-    const { data: deliveryRow } = await supabase
+    // An order can have more than one delivery - a re-delivery after a
+    // failed attempt, for example. The latest delivered one is the trip the
+    // customer is rating. maybeSingle() failed on those orders and the
+    // rating form never showed up.
+    const { data: deliveryRows } = await supabase
       .from('deliveries')
       .select('id, rider_id, status')
       .eq('order_id', orderId)
       .eq('status', 'delivered')
-      .maybeSingle()
+      .order('created_at', { ascending: false })
+      .limit(1)
+
+    const deliveryRow = deliveryRows && deliveryRows.length > 0 ? deliveryRows[0] : null
 
     if (!deliveryRow) {
       setLoading(false)
