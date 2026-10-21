@@ -59,30 +59,36 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  v_rider_id uuid;
 begin
+  -- The row is gone on a delete, so take the rider from the statement's
+  -- OLD row instead of the NEW one.
+  v_rider_id := coalesce(new.rider_id, old.rider_id);
+
   update public.rider_profiles rp
   set wallet_balance = coalesce((
          select sum(rt.amount)
          from public.rider_transactions rt
-         where rt.rider_id = new.rider_id
+         where rt.rider_id = v_rider_id
        ), 0),
       total_deliveries = (
          select count(*)
          from public.rider_transactions rt
-         where rt.rider_id = new.rider_id
+         where rt.rider_id = v_rider_id
            and rt.type = 'earning'
            and rt.delivery_id is not null
        ),
       updated_at = now()
-  where rp.id = new.rider_id;
+  where rp.id = v_rider_id;
 
-  return new;
+  return null;
 end;
 $$;
 
 drop trigger if exists rider_transactions_apply on public.rider_transactions;
 create trigger rider_transactions_apply
-after insert on public.rider_transactions
+after insert or delete on public.rider_transactions
 for each row
 execute function public.apply_rider_transaction();
 
