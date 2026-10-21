@@ -125,9 +125,13 @@ export function useDashboardStats() {
     queryFn: async () => {
       try {
         return await fetchDashboardStats()
-      } catch {
-        // Never surface a full-page error for dashboard stats — return empty
+      } catch (err) {
+        // Never surface a full-page error for dashboard stats - return empty
         // defaults so the seller always sees content, never an error page.
+        // Logged, because a silent fallback is indistinguishable from a seller
+        // with no sales at all, which is how a broken stats endpoint went
+        // unnoticed.
+        console.error('[seller/dashboard] stats request failed:', err)
         return {
           totalRevenue: 0,
           totalOrders: 0,

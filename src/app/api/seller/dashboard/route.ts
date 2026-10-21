@@ -74,17 +74,19 @@ export async function GET(request: NextRequest) {
         .eq('seller_id', seller.id)
         .eq('is_paid', false),
 
-      // Unique customers
+      // Unique customers. The buyer is on the order, not on the order item -
+      // order_items has no buyer_id column, so asking for it made the whole
+      // request fail and the dashboard fell back to showing zeroes.
       supabase
         .from('order_items')
-        .select('buyer_id')
+        .select('order:orders(buyer_id)')
         .eq('seller_id', seller.id)
         .gte('created_at', since),
 
       // Recent orders for conversion rate
       supabase
         .from('order_items')
-        .select('order_id, created_at')
+        .select('order_id, created_at, total_price')
         .eq('seller_id', seller.id)
         .gte('created_at', weekAgo),
     ])
@@ -108,7 +110,10 @@ export async function GET(request: NextRequest) {
     items.forEach((item: any) => {
       if (!orderMap.has(item.order_id)) {
         orderMap.set(item.order_id, {
-          ...item.order?.[0],
+          // The order comes back as a single object, not a list - reading
+          // item.order[0] left the status undefined, so no order was ever
+          // counted as pending or completed.
+          ...(item.order ?? {}),
           total: 0,
           quantity: 0,
         })
@@ -130,16 +135,18 @@ export async function GET(request: NextRequest) {
     const unpaidCommissions = commissions.reduce((s: number, c: any) => s + c.commission_amount, 0)
     
     // Unique customers
-    const uniqueCustomers = customersData.filter((c: any, i: number, arr: any[]) =>
-      arr.findIndex((x: any) => x.buyer_id === c.buyer_id) === i
-    )
+    const uniqueCustomers = customersData.filter((c: any, i: number, arr: any[]) => {
+      const buyerId = c.order?.buyer_id
+      if (!buyerId) return false
+      return arr.findIndex((x: any) => x.order?.buyer_id === buyerId) === i
+    })
     const totalCustomers = uniqueCustomers.length
 
     const totalUnits = items.reduce((s: number, i: any) => s + i.quantity, 0)
     const averageOrderValue = totalOrders ? Math.round(totalRevenue / totalOrders) : 0
 
     // Recent revenue (last 7 days)
-    const recentRevenue = weekItems.reduce((s: number, i: any) => s + i.total_price, 0)
+    const recentRevenue = weekItems.reduce((s: number, i: any) => s + (i.total_price ?? 0), 0)
 
     // Inventory value
     const inventoryValue = products.reduce((s: number, p: any) => s + (p.price * p.stock_quantity), 0)
