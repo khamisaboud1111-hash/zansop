@@ -13,6 +13,33 @@ export async function middleware(req: NextRequest) {
 
   const pathname = req.nextUrl.pathname
 
+  // /login and /register only exist to forward to the onboarding screen.
+  //
+  // Doing that with a server-side redirect() inside the page marks the
+  // Suspense boundary as errored - the HTML comes back with a <!--$!-->
+  // marker and a NEXT_REDIRECT template - and React cannot hydrate an
+  // errored boundary. Every visit to /login or /register threw a hydration
+  // error and React threw the server HTML away, so the whole page was
+  // re-rendered on the client. Redirecting here, before anything is
+  // rendered, keeps it a plain HTTP redirect with no hydration involved.
+  const AUTH_REDIRECTS: Record<string, string> = {
+    '/login': 'signin',
+    '/register': 'signup',
+  }
+
+  const authTarget = AUTH_REDIRECTS[pathname]
+  if (authTarget) {
+    const url = req.nextUrl.clone()
+    url.pathname = '/onboarding'
+    url.search = ''
+    url.searchParams.set('mode', authTarget)
+    const redirect = req.nextUrl.searchParams.get('redirect')
+    if (redirect && redirect.startsWith('/')) {
+      url.searchParams.set('redirect', redirect)
+    }
+    return NextResponse.redirect(url)
+  }
+
   // Allow all public routes
   if (PUBLIC_PREFIXES.some(p => pathname === p || pathname.startsWith(`${p}/`))) {
     return res
