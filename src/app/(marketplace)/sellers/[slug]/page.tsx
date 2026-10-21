@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase/server'
+﻿import { createServerClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { BadgeCheck, Star, Package, MessageCircle, MapPin, TrendingUp } from 'lucide-react'
@@ -9,7 +9,7 @@ import { SellerReviewList } from '@/components/reviews/ReviewLists'
 import { whatsappUrl } from '@/utils'
 import type { Metadata } from 'next'
 
-interface Props { params: { id: string } }
+interface Props { params: { slug: string } }
 
 async function getSeller(slug: string) {
   const supabase = createServerClient()
@@ -34,13 +34,13 @@ async function getSellerProducts(sellerId: string) {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const seller = await getSeller(params.id)
+  const seller = await getSeller(params.slug)
   if (!seller) return { title: 'Duka halipatikani' }
   return { title: `${seller.store_name} — Zanshop`, description: seller.description ?? '' }
 }
 
 export default async function SellerStorePage({ params }: Props) {
-  const seller = await getSeller(params.id)
+  const seller = await getSeller(params.slug)
   if (!seller) notFound()
 
   const products = await getSellerProducts(seller.id)
