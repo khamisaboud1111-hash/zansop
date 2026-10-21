@@ -67,6 +67,28 @@ export function useRiderTracking(riderId: string | undefined) {
     }
   }, [isOnline, riderId, pingLocation])
 
+  // Load the delivery the rider is already working on.
+  // The realtime listener below only fires on a row change, so without this
+  // the active job is missing on every page load and after a refresh: the
+  // rider sees no trip and cannot pick up or deliver it.
+  useEffect(() => {
+    if (!riderId) return
+    let cancelled = false
+    ;(async () => {
+      const { data } = await supabase
+        .from('deliveries')
+        .select('id, status')
+        .eq('rider_id', riderId)
+        .in('status', ['accepted', 'picked_up'])
+        .order('updated_at', { ascending: false })
+        .limit(1)
+      if (cancelled) return
+      const row = (data ?? [])[0] as { id: string; status: string } | undefined
+      setActiveDeliveryId(row?.id ?? null)
+    })()
+    return () => { cancelled = true }
+  }, [riderId, supabase])
+
   // Realtime: listen for deliveries assigned to this rider.
   useEffect(() => {
     if (!riderId) return
@@ -76,7 +98,7 @@ export function useRiderTracking(riderId: string | undefined) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'deliveries', filter: `rider_id=eq.${riderId}` },
-        (payload) => {
+        (payload: { new: unknown }) => {
           const row = payload.new as ActiveOffer
           if (row.status === 'pending_dispatch') {
             setOffer(row)

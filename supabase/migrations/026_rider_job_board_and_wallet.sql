@@ -183,8 +183,10 @@ begin
   where id = p_delivery_id
   returning * into v_row;
 
-  insert into public.rider_transactions (rider_id, type, amount, description, delivery_id)
-  values (auth.uid(), 'earning', coalesce(v_row.delivery_fee, 0), 'Delivery accepted', v_row.id);
+  -- No ledger row here on purpose: the rider has not earned anything yet.
+  -- The money is credited when the delivery is completed, and
+  -- api/delivery/update-status writes that entry. Writing one here too
+  -- would count the same delivery twice in the wallet history.
 
   return to_jsonb(v_row);
 end;
