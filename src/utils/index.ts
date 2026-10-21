@@ -53,8 +53,13 @@ export function generateSKU(storeName: string, productName: string): string {
   return `${storeCode}-${productCode}-${random}`
 }
 
+// The steps an order actually goes through. This has to match the
+// order_status enum: 'assigned' and 'picked_up' are not statuses an order
+// can be in, and cancelled/refunded are terminal states the tracker shows
+// on their own. A step that is not in the list has no icon in the tracker,
+// and reading it took the whole order page down.
 export const ORDER_STATUS_STEPS: OrderStatus[] = [
-  'pending', 'confirmed', 'packed', 'assigned', 'picked_up', 'out_for_delivery', 'delivered', 'cancelled', 'refunded'
+  'pending', 'confirmed', 'packed', 'out_for_delivery', 'delivered'
 ]
 
 export function getOrderStatusIndex(status: OrderStatus): number {

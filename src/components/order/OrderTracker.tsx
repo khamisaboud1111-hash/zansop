@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Check, Package, PackageCheck, Truck, Home, XCircle } from 'lucide-react'
 import { cn, ORDER_STATUS_STEPS, getOrderStatusIndex } from '@/utils'
@@ -13,6 +13,11 @@ const STATUS_CONFIG: Record<string, { icon: React.ReactNode; labelKey: Translati
   packed:           { icon: <PackageCheck className="w-4 h-4" />, labelKey: 'packed' },
   out_for_delivery: { icon: <Truck className="w-4 h-4" />,         labelKey: 'outForDelivery' },
   delivered:        { icon: <Home className="w-4 h-4" />,          labelKey: 'delivered' },
+}
+
+// A status without a config must never take the page down with it.
+function configFor(status: string): { icon: React.ReactNode; labelKey: TranslationKey } {
+  return STATUS_CONFIG[status] ?? { icon: <Package className="w-4 h-4" />, labelKey: 'pending' }
 }
 
 interface OrderTrackerProps {
@@ -46,7 +51,7 @@ export default function OrderTracker({ currentStatus, tracking = [] }: OrderTrac
         {ORDER_STATUS_STEPS.map((step, idx) => {
           const isCompleted = idx <= currentIndex
           const isCurrent   = idx === currentIndex
-          const config = STATUS_CONFIG[step]
+          const config = configFor(step)
 
           return (
             <div key={step} className="flex items-center flex-1 last:flex-none">
@@ -80,7 +85,7 @@ export default function OrderTracker({ currentStatus, tracking = [] }: OrderTrac
       <div className="flex justify-between">
         {ORDER_STATUS_STEPS.map((step, idx) => {
           const isCompleted = idx <= currentIndex
-          const config = STATUS_CONFIG[step]
+          const config = configFor(step)
           return (
             <div key={step} className={cn(
               'text-center',
