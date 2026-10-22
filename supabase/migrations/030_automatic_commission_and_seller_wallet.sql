@@ -222,9 +222,22 @@ declare
   v_commission integer;
   v_rate numeric;
   v_already_paid boolean;
+  v_delivered_trip boolean;
 begin
   -- Only the move into 'delivered' counts, and only forwards.
   if new.status <> 'delivered' or old.status = 'delivered' then
+    return new;
+  end if;
+
+  -- The rider has to have handed the order over. Without this the platform
+  -- would take its cut and pay the seller for a delivery that never
+  -- happened.
+  select exists (
+    select 1 from public.deliveries d
+    where d.order_id = new.id and d.status = 'delivered'
+  ) into v_delivered_trip;
+
+  if not v_delivered_trip then
     return new;
   end if;
 

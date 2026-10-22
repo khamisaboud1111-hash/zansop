@@ -43,11 +43,58 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   // Verify the requester is a seller of an item in this order, or admin
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') {
+  const isAdmin = profile?.role === 'admin'
+  if (!isAdmin) {
     const { data: seller } = await supabase.from('sellers').select('id').eq('user_id', user.id).single()
     const { data: items } = await supabase.from('order_items').select('seller_id').eq('order_id', params.id)
     const owns = items?.some((i) => i.seller_id === seller?.id)
     if (!owns) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const { data: current, error: currentErr } = await supabase
+    .from('orders')
+    .select('status')
+    .eq('id', params.id)
+    .single()
+
+  if (currentErr || !current) {
+    return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+  }
+
+  // An order only moves forward. A seller used to be able to set any status
+  // at all, which meant a delivered order could be walked back to packed.
+  if (!isAdmin && status !== 'cancelled') {
+    if (current.status === 'delivered' || current.status === 'cancelled' || current.status === 'refunded') {
+      return NextResponse.json(
+        { error: 'Agizo limekwisha kukamilishwa (this order is already finished)' },
+        { status: 409 }
+      )
+    }
+    if (status !== NEXT_STATUS[current.status]) {
+      return NextResponse.json(
+        { error: 'Haiwezi kubadilisha hatua (invalid status transition)' },
+        { status: 409 }
+      )
+    }
+  }
+
+  // The rider has to have delivered the order before it counts as
+  // delivered - otherwise the seller could mark it delivered themselves and
+  // the platform would pay out for a trip that never happened.
+  if (status === 'delivered') {
+    const { data: deliveredTrip } = await supabase
+      .from('deliveries')
+      .select('id')
+      .eq('order_id', params.id)
+      .eq('status', 'delivered')
+      .limit(1)
+
+    if (!deliveredTrip || deliveredTrip.length === 0) {
+      return NextResponse.json(
+        { error: 'Dereva bado hajafika (the rider has not delivered this order yet)' },
+        { status: 409 }
+      )
+    }
   }
 
   const { data: order, error } = await supabase
