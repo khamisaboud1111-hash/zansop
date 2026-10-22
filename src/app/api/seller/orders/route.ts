@@ -131,13 +131,59 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Order not found or not authorized' }, { status: 404 })
     }
 
+    // An order only moves forward, one step at a time, and it can only
+    // reach delivered once a rider has actually delivered it. The database
+    // enforces the same rule; this is here so the seller gets a clear
+    // message instead of a generic failure.
+    const { data: current } = await supabase
+      .from('orders')
+      .select('status')
+      .eq('id', orderId)
+      .single()
+
+    if (!current) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    }
+
+    if (status !== 'cancelled') {
+      const next: Record<string, string> = {
+        pending: 'confirmed',
+        confirmed: 'packed',
+        packed: 'out_for_delivery',
+        out_for_delivery: 'delivered',
+      }
+      if (next[current.status] !== status) {
+        return NextResponse.json(
+          { error: `An order only moves forward (${current.status} -> ${status} is not a step)` },
+          { status: 409 }
+        )
+      }
+      if (status === 'delivered') {
+        const { data: trip } = await supabase
+          .from('deliveries')
+          .select('id')
+          .eq('order_id', orderId)
+          .eq('status', 'delivered')
+          .limit(1)
+        if (!trip || trip.length === 0) {
+          return NextResponse.json(
+            { error: 'The rider has not delivered this order yet' },
+            { status: 409 }
+          )
+        }
+      }
+    }
+
     // Update order status
     const { error: updateError } = await supabase
       .from('orders')
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', orderId)
 
-    if (updateError) throw updateError
+    if (updateError) {
+      console.error('Error updating order:', updateError)
+      return NextResponse.json({ error: updateError.message }, { status: 409 })
+    }
 
     // Insert tracking record
     await supabase.from('order_tracking').insert({
