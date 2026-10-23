@@ -1,13 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
   <defs>
     <linearGradient id="zgrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#2563eb" />
-      <stop offset="50%" stop-color="#0ea5e9" />
-      <stop offset="100%" stop-color="#1d4ed8" />
+      <stop offset="0%" stop-color="#0d9488" />
+      <stop offset="50%" stop-color="#14b8a6" />
+      <stop offset="100%" stop-color="#06b6d4" />
     </linearGradient>
   </defs>
-  <!-- Solid black background -->
-  <rect width="200" height="200" fill="#000000" />
   <!-- Shopping bag handle -->
   <path d="M60 55 C60 25 90 25 90 25 L110 25 C140 25 140 55 140 55" stroke="url(#zgrad)" stroke-width="16" stroke-linecap="round" fill="none" />
   <!-- Bag body / Z shape -->

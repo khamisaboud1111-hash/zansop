@@ -49,7 +49,7 @@ export default function WelcomePage() {
             <img
               src="/zanshop-logo.svg"
               alt="Zanshop - Zanzibar Multivendor Marketplace"
-              className="w-full h-full object-contain drop-shadow-[0_4px_24px_rgba(20,184,166,0.4)]"
+              className="w-full h-full object-contain"
             />
           </div>
 
@@ -73,8 +73,8 @@ export default function WelcomePage() {
         >
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white leading-tight tracking-tight">
             {isSw
-              ? 'Kila unachohitaji,<br />hapa pekee Zanzibar.'
-              : 'Everything you need,<br />right here in Zanzibar.'}
+              ? 'Kila unachohitaji hapa Zanzibar.'
+              : 'everything you need here in zanzibar'}
           </h1>
           <p className="mt-3 text-base text-slate-600 dark:text-slate-300 leading-relaxed">
             {isSw
@@ -167,7 +167,7 @@ export default function WelcomePage() {
         transition={{ duration: 0.6, delay: 1.2 }}
         className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-slate-400 dark:text-slate-500"
       >
-        © 2025 Zanshop. All rights reserved.
+        © 2026 Zanshop. All rights reserved.
       </motion.p>
     </div>
   )
