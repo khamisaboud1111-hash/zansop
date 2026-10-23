@@ -6,7 +6,7 @@ const SELLER_ROUTES = ['/seller']
 const RIDER_ROUTES = ['/rider']
 const PROTECTED_ROUTES = ['/orders', '/wishlist', '/notifications', '/checkout', '/messages']
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password']
-const PUBLIC_PREFIXES = ['/products', '/sellers', '/search', '/categories', '/policies', '/onboarding', '/_next', '/api', '/favicon.ico', '/login', '/register', '/forgot-password', '/update-password']
+const PUBLIC_PREFIXES = ['/products', '/sellers', '/search', '/categories', '/policies', '/onboarding', '/welcome', '/_next', '/api', '/favicon.ico', '/login', '/register', '/forgot-password', '/update-password']
 
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next({ request: req })
@@ -73,7 +73,21 @@ export async function middleware(req: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+const { data: { user } } = await supabase.auth.getUser()
+
+  // Welcome page logic: redirect unauthenticated users from root to /welcome
+  // and authenticated users from /welcome to root (marketplace)
+  if (pathname === '/') {
+    if (!user) {
+      return NextResponse.redirect(new URL('/welcome', req.url))
+    }
+    // Authenticated users stay at root (marketplace)
+    return res
+  }
+
+  if (pathname === '/welcome' && user) {
+    return NextResponse.redirect(new URL('/', req.url))
+  }
 
   // Protect routes that require authentication
   const needsAuth = 
