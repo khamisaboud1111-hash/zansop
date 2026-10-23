@@ -1,7 +1,6 @@
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import type { Product } from '@/types'
 import type { HomeStats } from '@/components/home/HeroSection'
@@ -15,7 +14,6 @@ import TrustBadges from '@/components/home/TrustBadges'
 import GetStartedSteps from '@/components/home/GetStartedSteps'
 import FeaturedSellersShowcase from '@/components/home/FeaturedSellersShowcase'
 import ShippingSteps from '@/components/home/ShippingSteps'
-import ZanzibarDiscovery from '@/components/home/ZanzibarDiscovery'
 import CategoryGrid from '@/components/home/CategoryGrid'
 import TestimonialsSection from '@/components/home/TestimonialsSection'
 import ReelsFeed from '@/components/reels/ReelsFeed'
@@ -34,23 +32,8 @@ interface HomePageClientProps {
 }
 
 export function HomePageClient({ stats, featuredSellers, recentProducts, categories, testimonials, lang }: HomePageClientProps) {
-  const [showSplash, setShowSplash] = useState(true)
-
-  // Dismiss splash after 3 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 3000)
-    return () => clearTimeout(timer)
-  }, [])
-
   return (
     <>
-      {showSplash && (
-        <div className="fixed inset-0 z-50 bg-white dark:bg-black flex flex-col items-center justify-center transition-opacity duration-500">
-          <Image src="/zanshop-splash.svg" alt="Zanshop" width={200} height={200} className="mb-6" priority />
-          <div className="text-brand-600 dark:text-brand-400 font-black text-3xl sm:text-5xl tracking-tight">Zanshop</div>
-          <p className="text-brand-600 dark:text-brand-400 font-semibold text-lg tracking-wide mt-2">Buy and seller made easy</p>
-        </div>
-      )}
       <MobileLanguageSelector />
       <SectionErrorBoundary name="HeroSection" lang={lang}>
         <HeroSection stats={stats} />
@@ -125,10 +108,6 @@ export function HomePageClient({ stats, featuredSellers, recentProducts, categor
 
       <SectionErrorBoundary name="TestimonialsSection" lang={lang}>
         <TestimonialsSection testimonials={testimonials} />
-      </SectionErrorBoundary>
-
-      <SectionErrorBoundary name="ZanzibarDiscovery" lang={lang}>
-        <ZanzibarDiscovery lang={lang} />
       </SectionErrorBoundary>
 
       <SectionErrorBoundary name="ReelsFeed" lang={lang}>
