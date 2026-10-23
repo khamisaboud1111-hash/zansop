@@ -38,18 +38,29 @@ export default function WelcomePage() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-between px-6 py-8 w-full max-w-md mx-auto">
-        {/* Zanshop Logo */}
+        {/* Zanshop Logo with Zanzibar backdrop */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
           className="flex flex-col items-center"
         >
           <div className="relative w-32 h-32 sm:w-36 sm:h-36">
+            {/* Zanzibar backdrop behind logo - circular */}
+            <div
+              className="absolute inset-0 rounded-full bg-cover bg-center"
+              style={{
+                backgroundImage: 'url(/images/zanzibar/stone-town-aerial.jpg)',
+                backgroundPosition: 'center 30%',
+              }}
+              aria-hidden="true"
+            />
+            {/* Logo with multiply blend to remove white background */}
             <img
               src="/zanshop-logo.jpeg"
               alt="Zanshop - Zanzibar Multivendor Marketplace"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain mix-blend-multiply"
+              style={{ filter: 'contrast(1.1) brightness(0.95)' }}
             />
           </div>
 
