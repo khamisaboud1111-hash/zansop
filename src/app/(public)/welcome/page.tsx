@@ -47,7 +47,7 @@ export default function WelcomePage() {
         >
           <div className="relative w-32 h-32 sm:w-36 sm:h-36">
             <img
-              src="/zanshop-logo.svg"
+              src="/zanshop-logo.jpeg"
               alt="Zanshop - Zanzibar Multivendor Marketplace"
               className="w-full h-full object-contain"
             />
