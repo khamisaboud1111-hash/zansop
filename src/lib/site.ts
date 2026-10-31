@@ -28,8 +28,19 @@ export function normalizeOrigin(value: string | undefined | null): string | null
 }
 
 export function getSiteOrigin(): string {
-  const configured = normalizeOrigin(process.env.NEXT_PUBLIC_APP_URL)
-  if (configured && ALLOWED_ORIGINS.has(configured)) return configured
+  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim()
+  const configured = normalizeOrigin(raw)
+
+  if (configured && ALLOWED_ORIGINS.has(configured)) {
+    return configured
+  }
+
+  if (raw) {
+    console.warn(
+      `[site] Ignoring NEXT_PUBLIC_APP_URL="${raw}" because it is not an allowed origin. Falling back to ${CANONICAL_ORIGIN}.`
+    )
+  }
+
   return CANONICAL_ORIGIN
 }
 

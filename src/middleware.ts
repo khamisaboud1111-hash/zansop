@@ -8,6 +8,41 @@ const PROTECTED_ROUTES = ['/orders', '/wishlist', '/notifications', '/checkout',
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password']
 const PUBLIC_PREFIXES = ['/products', '/sellers', '/search', '/categories', '/policies', '/onboarding', '/welcome', '/_next', '/api', '/favicon.ico', '/login', '/register', '/forgot-password', '/update-password']
 
+const RATE_LIMIT_WINDOW_MS = 60_000
+const RATE_LIMIT_MAX_REQUESTS = 120
+
+type RateLimitBucket = {
+  count: number
+  resetAt: number
+}
+
+const rateLimitBuckets = new Map<string, RateLimitBucket>()
+
+function getClientIp(req: NextRequest) {
+  const forwarded = req.headers.get('x-forwarded-for')
+  const ip = forwarded ? forwarded.split(',')[0]?.trim() : req.headers.get('x-real-ip')
+  return ip || 'unknown'
+}
+
+function isRateLimited(req: NextRequest) {
+  const now = Date.now()
+  const key = getClientIp(req)
+  const bucket = rateLimitBuckets.get(key)
+
+  if (!bucket || bucket.resetAt <= now) {
+    rateLimitBuckets.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
+    if (rateLimitBuckets.size > 10_000) {
+      for (const [bucketKey, value] of rateLimitBuckets) {
+        if (value.resetAt <= now) rateLimitBuckets.delete(bucketKey)
+      }
+    }
+    return false
+  }
+
+  bucket.count += 1
+  return bucket.count > RATE_LIMIT_MAX_REQUESTS
+}
+
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next({ request: req })
 
@@ -53,6 +88,13 @@ export async function middleware(req: NextRequest) {
   // Skip static assets
   if (pathname.startsWith('/_next') || pathname.startsWith('/favicon') || pathname.includes('.')) {
     return res
+  }
+
+  if (isRateLimited(req)) {
+    return new NextResponse('Too Many Requests', {
+      status: 429,
+      headers: { 'Retry-After': '60' },
+    })
   }
 
   const supabase = createServerClient(

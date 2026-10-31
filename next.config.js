@@ -56,6 +56,11 @@ const nextConfig = {
               // rider only ever saw "failed to calculate route".
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org https://server.arcgisonline.com https://router.project-osrm.org",
               "frame-ancestors 'none'",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "frame-src 'self' https://checkout.flutterwave.com",
+              ...(isProd ? ["upgrade-insecure-requests"] : []),
             ].join('; '),
           },
         ],
