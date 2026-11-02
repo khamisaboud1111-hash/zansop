@@ -9,6 +9,7 @@ vi.mock('@/lib/payments/aggregator', () => ({
   verifyTransaction: vi.fn(),
 }))
 
+import { NextRequest } from 'next/server'
 import { POST } from './route'
 import { isValidWebhookSignature, verifyTransaction } from '@/lib/payments/aggregator'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -18,7 +19,7 @@ const mockedVerifyTransaction = verifyTransaction as ReturnType<typeof vi.fn>
 const mockedCreateAdminClient = createAdminClient as ReturnType<typeof vi.fn>
 
 function makeRequest(body: any, headers: Record<string, string> = {}) {
-  return new Request('http://localhost/api/payments/webhook', {
+  return new NextRequest('http://localhost/api/payments/webhook', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...headers },
     body: JSON.stringify(body),
@@ -48,7 +49,7 @@ describe('POST /api/payments/webhook', () => {
   })
 
   it('rejects invalid JSON', async () => {
-    const req = new Request('http://localhost/api/payments/webhook', {
+    const req = new NextRequest('http://localhost/api/payments/webhook', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'verif-hash': 'test-secret-hash' },
       body: 'not json',
@@ -74,7 +75,7 @@ describe('POST /api/payments/webhook', () => {
       verified: true,
       status: 'successful',
       amount: 500,
-      orderId: null,
+      orderId: undefined,
       txRef: 'tx-ref-1',
     })
     const mockSupabase = {
@@ -87,7 +88,7 @@ describe('POST /api/payments/webhook', () => {
     }
     const { createAdminClient } = await import('@/lib/supabase/admin')
     const mockedCreateAdminClient = vi.mocked(createAdminClient)
-    mockedCreateAdminClient.mockReturnValue(mockSupabase)
+    mockedCreateAdminClient.mockReturnValue(mockSupabase as unknown as ReturnType<typeof createAdminClient>)
     const req = makeRequest({ data: { id: 'tx-123' } }, { 'verif-hash': 'test-secret-hash' })
     const res = await POST(req)
     expect(res.status).toBe(422)
@@ -101,7 +102,7 @@ describe('POST /api/payments/webhook', () => {
       status: 'successful',
       amount: 10000,
       orderId: 'order-1',
-      txRef: null,
+      txRef: undefined,
     })
     const mockSupabase = {
       from: vi.fn().mockReturnThis(),
@@ -111,7 +112,7 @@ describe('POST /api/payments/webhook', () => {
     }
     const { createAdminClient } = await import('@/lib/supabase/admin')
     const mockedCreateAdminClient = vi.mocked(createAdminClient)
-    mockedCreateAdminClient.mockReturnValue(mockSupabase)
+    mockedCreateAdminClient.mockReturnValue(mockSupabase as unknown as ReturnType<typeof createAdminClient>)
     const req = makeRequest({ data: { id: 'tx-123' } }, { 'verif-hash': 'test-secret-hash' })
     const res = await POST(req)
     expect(res.status).toBe(200)

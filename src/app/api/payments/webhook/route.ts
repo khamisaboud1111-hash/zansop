@@ -1,58 +1,128 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyTransaction } from '@/lib/payments/aggregator';
+import { createAdminClient } from '@/lib/supabase/admin';
+
+const SUCCESSFUL_STATUSES = ['successful', 'completed'];
+
+type FlutterwaveWebhookPayload = {
+  data?: {
+    id?: string | number;
+  };
+} | null;
 
 export async function POST(req: NextRequest) {
-  const signature = req.headers.get('verif-hash')
-
-  if (!signature) {
-    console.warn('[payments/webhook] rejected: missing verif-hash')
-    return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
-  }
-
-  // Validate webhook signature using FLUTTERWAVE_SECRET_HASH
-  const expectedHash = process.env.FLUTTERWAVE_SECRET_HASH
-  if (!expectedHash || signature !== expectedHash) {
-    console.warn('[payments/webhook] rejected: invalid verif-hash')
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
-  }
-
-  let body: any
   try {
-    body = await req.json()
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+    const signature = req.headers.get('verif-hash');
+
+    if (!signature) {
+      return NextResponse.json({ error: 'Missing signature' }, { status: 401 });
+    }
+
+    const secretHash = process.env.FLUTTERWAVE_SECRET_HASH;
+
+    if (!secretHash || signature !== secretHash) {
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    }
+
+    let payload: FlutterwaveWebhookPayload = null;
+
+    try {
+      payload = (await req.json()) as FlutterwaveWebhookPayload;
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    }
+
+    const rawId = payload?.data?.id;
+
+    if (rawId === undefined || rawId === null || rawId === '') {
+      return NextResponse.json(
+        { error: 'Missing transaction id' },
+        { status: 400 }
+      );
+    }
+
+    const transactionId = String(rawId);
+    const verification = await verifyTransaction(transactionId);
+
+    if (!verification || !verification.verified) {
+      return NextResponse.json(
+        { error: 'Payment verification failed' },
+        { status: 502 }
+      );
+    }
+
+    const supabase = createAdminClient();
+
+    let orderId = verification.orderId ?? null;
+
+    if (!orderId && verification.txRef) {
+      const orderByRef = await supabase
+        .from('orders')
+        .select('id')
+        .eq('tx_ref', verification.txRef)
+        .maybeSingle();
+
+      orderId = orderByRef?.data?.id ?? null;
+    }
+
+    if (!orderId) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    const { data: existingOrder } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .single();
+
+    if (!existingOrder) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    const expectedAmount = Number(existingOrder.total_amount ?? 0);
+    const receivedAmount = Number(verification.amount ?? 0);
+
+    if (receivedAmount < expectedAmount) {
+      return NextResponse.json(
+        {
+          error: 'Amount mismatch',
+          expected: expectedAmount,
+          received: receivedAmount,
+        },
+        { status: 422 }
+      );
+    }
+
+    if (existingOrder.payment_confirmed) {
+      return NextResponse.json(
+        { success: true, already_processed: true },
+        { status: 200 }
+      );
+    }
+
+    if (
+      verification.status &&
+      !SUCCESSFUL_STATUSES.includes(verification.status)
+    ) {
+      await supabase
+        .from('orders')
+        .update({ status: 'payment_failed' })
+        .eq('id', orderId);
+
+      return NextResponse.json({ success: true }, { status: 200 });
+    }
+
+    await supabase
+      .from('orders')
+      .update({ payment_confirmed: true, status: 'confirmed' })
+      .eq('id', orderId);
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    console.error('[payments/webhook] unexpected error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
-
-  const provider = 'flutterwave'
-  const transactionId = body?.data?.id
-  const providerReference = body?.data?.tx_ref
-  const status = body?.data?.status
-  const amount = body?.data?.amount
-  const currency = body?.data?.currency ?? 'TZS'
-
-  if (!transactionId || !providerReference) {
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
-  }
-
-  const supabase = createAdminClient()
-
-  // Call the atomic database function to process the webhook
-  const { data, error } = await supabase.rpc('process_payment_webhook', {
-    p_provider: 'flutterwave',
-    p_provider_reference: body.data.tx_ref,
-    p_transaction_id: String(transactionId),
-    p_status: body.data.status,
-    p_amount: body.data.amount,
-    p_currency: body.data.currency ?? 'TZS',
-    p_raw_payload: body,
-  })
-
-  if (error) {
-    console.error('[payments/webhook] RPC error:', error)
-    // Return success to prevent webhook retries for non-retryable errors
-    return NextResponse.json({ success: true, error: error.message })
-  }
-
-  return NextResponse.json(data ?? { success: true })
 }
-
