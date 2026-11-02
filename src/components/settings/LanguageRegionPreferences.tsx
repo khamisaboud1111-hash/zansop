@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react'
 import { Globe, MapPin, Languages, Clock } from 'lucide-react'
 import { useLangStore } from '@/store'
-import { t } from '@/i18n/translations'
+import { t, type Language } from '@/i18n/translations'
 import { useUser } from '@/hooks/useUser'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/utils'
 import toast from 'react-hot-toast'
 
-const languages = [
+const languages: { code: Language; name: string; nativeName: string; flag: string }[] = [
   { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
   { code: 'sw', name: 'Swahili', nativeName: 'Kiswahili', flag: '🇹🇿' },
   { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
@@ -46,7 +46,7 @@ export function LanguageRegionPreferences() {
         .maybeSingle()
       
       if (data) {
-        if (data.language) setLang(data.language)
+        if (data.language) setLang(data.language as Language)
         if (data.region) setRegion(data.region)
       }
     } catch (error) {
@@ -56,7 +56,7 @@ export function LanguageRegionPreferences() {
     }
   }
 
-  const handleLanguageChange = async (languageCode: string) => {
+  const handleLanguageChange = async (languageCode: Language) => {
     setLang(languageCode)
     if (profile) {
       try {
@@ -236,4 +236,3 @@ export function LanguageRegionPreferences() {
     </div>
   )
 }
-
