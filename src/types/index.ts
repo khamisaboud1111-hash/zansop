@@ -55,15 +55,19 @@ export interface Seller {
   total_sales: number
   total_revenue: number
   average_rating: number
+  rating: number
   review_count: number
   is_featured: boolean
   verified_at: string | null
   location_area: string | null
+  location: string | null
   latitude: number | null
   longitude: number | null
   location_label: string | null
   national_id_verified: boolean
   business_license_verified: boolean
+  delivery_available: boolean
+  pickup_available: boolean
   created_at: string
   updated_at: string
   // joins
@@ -87,7 +91,7 @@ export interface SellerVerificationDocument {
 
 // ─── Payments ──────────────────────────────────────────────────────────────────
 
-export type PaymentProvider = 'mpesa' | 'airtel_money' | 'tigo_pesa' | 'cash_on_delivery' | 'manual'
+export type PaymentProvider = 'mpesa' | 'airtel_money' | 'tigo_pesa' | 'cash_on_delivery' | 'manual' | 'flutterwave'
 export type PaymentStatus = 'initiated' | 'pending' | 'completed' | 'failed' | 'cancelled' | 'refunded'
 
 export interface PaymentTransaction {

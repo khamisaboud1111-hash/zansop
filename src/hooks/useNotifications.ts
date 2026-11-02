@@ -67,16 +67,16 @@ export function useNotifications() {
 
         await fetch()
 
-        channel = supabase
+channel = supabase
           .channel(`notifications-${instanceId}-${user.id}`)
           .on('postgres_changes', {
             event: 'INSERT',
             schema: 'public',
             table: 'notifications',
             filter: `user_id=eq.${user.id}`,
-          }, (payload) => {
+          }, (payload: { new: Notification }) => {
             if (!mountedRef.current) return
-            const n = payload.new as Notification
+            const n = payload.new
             setNotifications((prev) => [n, ...prev])
             setUnreadCount((c) => c + 1)
           })

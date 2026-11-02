@@ -6,11 +6,11 @@ import { persist } from 'zustand/middleware'
 import type { CartItem, Product } from '@/types'
 import type { Language } from '@/i18n/translations'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+export type { Language }
 
 export type Theme = 'light' | 'dark'
 
-interface CartStore {
+interface CartState {
   items: CartItem[]
   isOnline: boolean
   lastSynced: number
@@ -22,18 +22,18 @@ interface CartStore {
   syncCart: () => void
 }
 
-interface UiStore {
+interface UiState {
   sidebarOpen: boolean
   setSidebarOpen: (open: boolean) => void
   toggleSidebar: () => void
 }
 
-interface LangStore {
+interface LangState {
   lang: Language
   setLang: (lang: Language) => void
 }
 
-interface ThemeStore {
+interface ThemeState {
   theme: Theme
   hasHydrated: boolean
   highContrast: boolean
@@ -43,22 +43,27 @@ interface ThemeStore {
 }
 
 export interface Stores {
-  useCartStore: ReturnType<typeof create<CartStore>>
-  useUiStore: ReturnType<typeof create<UiStore>>
-  useLangStore: ReturnType<typeof create<LangStore>>
-  useThemeStore: ReturnType<typeof create<ThemeStore>>
+  useCartStore: ReturnType<typeof createCartStore>
+  useUiStore: ReturnType<typeof createUiStore>
+  useLangStore: ReturnType<typeof createLangStore>
+  useThemeStore: ReturnType<typeof createThemeStore>
 }
 
-// ─── Store Factories (only run on client) ────────────────────────────────────
+const StoresContext = createContext<Stores | null>(null)
+
+export function useStores() {
+  const ctx = useContext(StoresContext)
+  if (!ctx) throw new Error('useStores must be used within StoresProvider')
+  return ctx
+}
 
 function createCartStore() {
-  return create<CartStore>()(
+  return create<CartState>()(
     persist(
       (set, get) => ({
         items: [],
         isOnline: true,
         lastSynced: 0,
-
         addItem: (product, quantity = 1) => {
           set((state) => {
             const existing = state.items.find((i) => i.product.id === product.id)
@@ -74,13 +79,11 @@ function createCartStore() {
             return { items: [...state.items, { product, quantity }] }
           })
         },
-
         removeItem: (productId) => {
           set((state) => ({
             items: state.items.filter((i) => i.product.id !== productId),
           }))
         },
-
         updateQuantity: (productId, quantity) => {
           if (quantity <= 0) {
             get().removeItem(productId)
@@ -92,24 +95,17 @@ function createCartStore() {
             ),
           }))
         },
-
         clearCart: () => set({ items: [] }),
-
         setOnlineStatus: (online) => {
           set({ isOnline: online })
           if (online) get().syncCart()
         },
-
         syncCart: () => {
           set({ lastSynced: Date.now() })
         },
       }),
       {
         name: 'zanshop-cart',
-        // Rehydrating from localStorage during the first client render makes the
-        // cart differ from the server-rendered markup, which threw a hydration
-        // mismatch (React #418/#422) and left the root on a blank client render.
-        // Defer rehydration until after mount - see StoresProvider below.
         skipHydration: true,
         partialize: (state) => ({
           items: state.items.map(({ product, quantity }) => ({
@@ -132,7 +128,7 @@ function createCartStore() {
 }
 
 function createUiStore() {
-  return create<UiStore>()((set) => ({
+  return create<UiState>()((set) => ({
     sidebarOpen: false,
     setSidebarOpen: (open: boolean) => set({ sidebarOpen: open }),
     toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
@@ -140,7 +136,7 @@ function createUiStore() {
 }
 
 function createLangStore() {
-  return create<LangStore>()(() => ({
+  return create<LangState>()(() => ({
     lang: 'sw',
     setLang: (lang: Language) => {
       if (typeof document !== 'undefined') {
@@ -152,7 +148,7 @@ function createLangStore() {
 }
 
 function createThemeStore() {
-  return create<ThemeStore>()(() => ({
+  return create<ThemeState>()(() => ({
     theme: 'light',
     hasHydrated: true,
     highContrast: false,
@@ -174,24 +170,8 @@ function createThemeStore() {
   }))
 }
 
-// ─── Context ──────────────────────────────────────────────────────────────────
-
-const StoresContext = createContext<Stores | null>(null)
-
-export function useStores() {
-  const ctx = useContext(StoresContext)
-  if (!ctx) throw new Error('useStores must be used within StoresProvider')
-  return ctx
-}
-
-// ─── Provider ──────────────────────────────────────────────────────────────────
-
 export function StoresProvider({ children }: { children: ReactNode }) {
-  // Created synchronously so the server renders `children` instead of null.
-  // Every factory guards its browser API access with `typeof document`, so this
-  // is SSR-safe; creating them in useEffect left the whole app unrendered on the
-  // server and made every useStores() call throw.
-  const [stores] = useState<Stores>(() => ({
+  const [stores] = useState(() => ({
     useCartStore: createCartStore(),
     useUiStore: createUiStore(),
     useLangStore: createLangStore(),
@@ -199,20 +179,12 @@ export function StoresProvider({ children }: { children: ReactNode }) {
   }))
 
   useEffect(() => {
-    // Rehydrate persisted state only after the first client render has matched
-    // the server output, otherwise localStorage leaks into the initial markup.
-    // The read can fail (private browsing, blocked storage, corrupted cache) and
-    // must never crash hydration - an unhandled effect error unmounts the whole
-    // tree and leaves a blank page with nothing to report.
     try {
       stores.useCartStore.persist?.rehydrate()
     } catch {
       // Persist is a convenience, never hard-require it.
     }
 
-    // Initialize online/offline listeners. The handlers are declared outside
-    // the try block so the cleanup below can actually remove them - scoping
-    // them to the try made them undefined in the cleanup.
     const handleOnline = () => stores.useCartStore.getState().setOnlineStatus(true)
     const handleOffline = () => stores.useCartStore.getState().setOnlineStatus(false)
     try {
@@ -231,7 +203,7 @@ export function StoresProvider({ children }: { children: ReactNode }) {
         // Best-effort cleanup only.
       }
     }
-  }, [stores])
+  }, [])
 
   return (
     <StoresContext.Provider value={stores}>
@@ -240,43 +212,25 @@ export function StoresProvider({ children }: { children: ReactNode }) {
   )
 }
 
-// ─── Hooks ────────────────────────────────────────────────────────────────────
-//
-// These delegate to the underlying zustand hooks and forward any selector.
-// Previously they ignored arguments and returned the store function itself, so
-// `const { lang } = useLangStore()` destructured undefined and
-// `useLangStore.getState()` threw - which broke the error boundaries into
-// rendering nothing (a silent blank page) and add-to-cart into failing.
-
-export function useCartStore(): CartStore
-export function useCartStore<T>(selector: (state: CartStore) => T): T
-export function useCartStore<T>(selector?: (state: CartStore) => T): T | CartStore {
+export function useCartStore<T = CartState>(selector?: (state: CartState) => T): T extends CartState ? CartState : T {
   const store = useStores().useCartStore
-  return selector ? store(selector) : store()
+  return (selector ? store(selector) : store()) as T extends CartState ? CartState : T
 }
 
-export function useUiStore(): UiStore
-export function useUiStore<T>(selector: (state: UiStore) => T): T
-export function useUiStore<T>(selector?: (state: UiStore) => T): T | UiStore {
+export function useUiStore<T = UiState>(selector?: (state: UiState) => T): T extends UiState ? UiState : T {
   const store = useStores().useUiStore
-  return selector ? store(selector) : store()
+  return (selector ? store(selector) : store()) as T extends UiState ? UiState : T
 }
 
-export function useLangStore(): LangStore
-export function useLangStore<T>(selector: (state: LangStore) => T): T
-export function useLangStore<T>(selector?: (state: LangStore) => T): T | LangStore {
+export function useLangStore<T = LangState>(selector?: (state: LangState) => T): T extends LangState ? LangState : T {
   const store = useStores().useLangStore
-  return selector ? store(selector) : store()
+  return (selector ? store(selector) : store()) as T extends LangState ? LangState : T
 }
 
-export function useThemeStore(): ThemeStore
-export function useThemeStore<T>(selector: (state: ThemeStore) => T): T
-export function useThemeStore<T>(selector?: (state: ThemeStore) => T): T | ThemeStore {
+export function useThemeStore<T = ThemeState>(selector?: (state: ThemeState) => T): T extends ThemeState ? ThemeState : T {
   const store = useStores().useThemeStore
-  return selector ? store(selector) : store()
+  return (selector ? store(selector) : store()) as T extends ThemeState ? ThemeState : T
 }
-
-// ─── Selectors ────────────────────────────────────────────────────────────────
 
 export const selectCartItemCount = (state: { items: CartItem[] }) =>
   state.items.reduce((sum, item) => sum + item.quantity, 0)
@@ -291,3 +245,4 @@ export const selectCartTotalSavings = (state: { items: CartItem[] }) =>
     return sum + Math.max(0, (originalPrice - currentPrice) * item.quantity)
   }, 0)
 
+export type { CartState, UiState, LangState, ThemeState }

@@ -30,7 +30,7 @@ export default function BuyerMessagePage() {
       .select('store_name')
       .eq('id', params.sellerId)
       .single()
-      .then(({ data }) => {
+      .then(({ data }: { data: { store_name: string } | null }) => {
         if (data) setStoreName(data.store_name)
         setLoadingStore(false)
       })

@@ -104,8 +104,7 @@ function applyTheme(theme: Theme) {
 }
 
 export function ClientInitializer() {
-  const langStore = useStores().useLangStore
-  const themeStore = useStores().useThemeStore
+  const { useLangStore, useThemeStore } = useStores()
 
   // Sync from cookies after hydration
   useEffect(() => {
@@ -115,9 +114,9 @@ export function ClientInitializer() {
     const theme: Theme = themeCookie === 'dark' ? 'dark' : 'light'
     applyDir(lang)
     applyTheme(theme)
-    langStore.getState().setLang(lang)
-    themeStore.getState().setTheme(theme)
-  }, [langStore, themeStore])
+    useLangStore.getState().setLang(lang)
+    useThemeStore.getState().setTheme(theme)
+  }, [useLangStore, useThemeStore])
 
   return null
 }

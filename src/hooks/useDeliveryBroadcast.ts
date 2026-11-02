@@ -65,8 +65,8 @@ export function useDeliveryBroadcastSubscriber(
 
     const channel = supabase
       .channel(`delivery-track-${deliveryId}`, { config: { broadcast: { self: false } } })
-      .on('broadcast', { event: 'location' }, ({ payload }) => {
-        onLocation(payload as DeliveryLocationPayload)
+.on('broadcast', { event: 'location' }, ({ payload }: { payload: DeliveryLocationPayload }) => {
+        onLocation(payload)
       })
       .subscribe()
 

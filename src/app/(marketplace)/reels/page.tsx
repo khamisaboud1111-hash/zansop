@@ -30,9 +30,9 @@ export default function ReelsPage() {
         <ReelsFeed
           hashtag={hashtag}
           sellerId={sellerId}
+          lang={lang}
         />
       </React.Suspense>
     </main>
   )
 }
-

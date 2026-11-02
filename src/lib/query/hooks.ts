@@ -23,24 +23,30 @@ export interface SellerDashboardStats {
 
 export interface Product {
   id: string
+  seller_id: string
+  category_id: string
   name: string
+  slug: string
   description: string
   price: number
   compare_at_price: number | null
   stock_quantity: number
-  sku: string
+  sku: string | null
   weight_grams: number | null
   status: 'draft' | 'active' | 'out_of_stock' | 'rejected'
   is_made_in_zanzibar: boolean
-  category_id: string
-  category?: { id: string; name_sw: string; name_en: string }
-  images: { id: string; url: string; is_primary: boolean; sort_order: number }[]
-  videos: { id: string; url: string; sort_order: number }[]
-  total_sold: number
+  location_area: string | null
+  pickup_available: boolean
+  delivery_available: boolean
+  tags: string[]
   average_rating: number
   review_count: number
+  total_sold: number
   created_at: string
   updated_at: string
+  category?: { id: string; name_en: string; name_sw: string; slug: string; icon: string; parent_id: string | null; sort_order: number }
+  images: { id: string; product_id: string; url: string; sort_order: number; is_primary: boolean }[]
+  videos: { id: string; product_id: string; url: string; thumbnail_url: string | null; sort_order: number }[]
 }
 
 export interface Order {

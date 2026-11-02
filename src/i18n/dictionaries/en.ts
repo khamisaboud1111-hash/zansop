@@ -527,7 +527,7 @@ export const en = {
   earnings: 'Earnings',
   todayEarnings: 'Today\'s Earnings',
   weekEarnings: 'Weekly Earnings',
-    walletBalance: 'Wallet Balance',
+  walletBalance: 'Wallet Balance',
   withdraw: 'Withdraw',
   totalEarnings: 'Total Earnings',
   transactionHistory: 'Transaction History',
@@ -638,7 +638,7 @@ export const en = {
   contactSuccess: 'Message sent!',
   contactSuccessDesc: 'Thank you for reaching out. We’ll reply within 24 hours.',
   contactGeneral: 'General inquiries',
-   contactCustomerSupport: 'Customer support',
+  contactCustomerSupport: 'Customer support',
   contactPartnership: 'Partnership',
   contactSales: 'Sales',
   contactFAQ: 'Visit our Help Center',
@@ -688,11 +688,9 @@ export const en = {
   whatsapp: 'WhatsApp',
 
   // Global Error Boundary
-  globalError: {
-    title: 'Something went wrong',
-    description: 'Sorry, an error occurred. Please try again.',
-    retryLabel: 'Try again',
-  },
+  globalErrorTitle: 'Something went wrong',
+  globalErrorDescription: 'Sorry, an error occurred. Please try again.',
+  globalErrorRetryLabel: 'Try again',
 
   // Section Error Boundary
   somethingWentWrong: 'Something went wrong',

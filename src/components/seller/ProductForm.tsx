@@ -73,7 +73,7 @@ export default function ProductForm({ seller, product }: Props) {
   const name = watch('name')
 
   useEffect(() => {
-    supabase.from('categories').select('*').order('sort_order').then(({ data }) => setCategories(data ?? []))
+    supabase.from('categories').select('*').order('sort_order').then(({ data }: { data: Category[] | null }) => setCategories(data ?? []))
   }, [])
 
   async function onSubmit(data: FormData) {

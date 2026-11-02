@@ -76,9 +76,9 @@ export function NotificationPreferences() {
         .select('*')
         .eq('user_id', profile.id)
       
-      if (data) {
+if (data) {
         const loaded: Record<string, { push: boolean; email: boolean; sms: boolean }> = {}
-        data.forEach(pref => {
+        data.forEach((pref: { type: string; push: boolean; email: boolean; sms: boolean }) => {
           loaded[pref.type] = { push: pref.push, email: pref.email, sms: pref.sms }
         })
         setSettings(loaded)

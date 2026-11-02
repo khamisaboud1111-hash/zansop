@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useLangStore } from "@/store"
 import { t, type Language } from "@/i18n/translations"
 
-const LANGUAGES = [
+const LANGUAGES: { code: Language; label: string; nativeLabel: string; flag: string }[] = [
   { code: "en", label: "English", nativeLabel: "English", flag: "🇺🇸" },
   { code: "sw", label: "Swahili", nativeLabel: "Kiswahili", flag: "🇹🇿" },
   { code: "ar", label: "Arabic", nativeLabel: "العربية", flag: "🇸🇦" },

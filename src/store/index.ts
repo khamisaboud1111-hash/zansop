@@ -5,14 +5,14 @@ export {
   useThemeStore,
   StoresProvider,
   useStores,
-  type CartStore,
-  type UiStore,
-  type LangStore,
-  type ThemeStore,
+  type CartState,
+  type UiState,
+  type LangState,
+  type ThemeState,
   type Theme,
   type Stores,
   selectCartItemCount,
   selectCartSubtotal,
   selectCartTotalSavings,
-} from './StoresProvider.tsx'
-
+  type Language,
+} from './StoresProvider'

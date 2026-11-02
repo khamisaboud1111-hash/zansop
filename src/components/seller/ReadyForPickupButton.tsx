@@ -40,11 +40,11 @@ export default function ReadyForPickupButton({
 
     const channel = supabase
       .channel(`delivery-status-${dispatch.deliveryId}`)
-      .on(
+.on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'deliveries', filter: `id=eq.${dispatch.deliveryId}` },
-        (payload) => {
-          const status = (payload.new as { status: DispatchState['status'] }).status
+        (payload: { new: { status: DispatchState['status'] } }) => {
+          const status = payload.new.status
           setDispatch((d) => ({ ...d, status }))
         }
       )

@@ -215,7 +215,7 @@ export default function SellerDashboardPage() {
             value={formatTZS(stats.totalRevenue)} 
             icon={<DollarSign className="w-5 h-5" />} 
             accent="brand" 
-            subtitle={<><ArrowUpRight className="w-3 h-3 inline mr-1" />{formatTZS(stats.recentRevenue)} this week</>} 
+            subtitle={`${formatTZS(stats.recentRevenue)} this week`} 
           />
           <StatCard 
             label="Orders" 
@@ -454,4 +454,3 @@ export default function SellerDashboardPage() {
     </div>
   )
 }
-

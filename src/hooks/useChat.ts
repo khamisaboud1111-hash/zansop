@@ -204,8 +204,8 @@ export function useChat(options: UseChatOptions) {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages', filter: `room_id=eq.${room.id}` },
-        (payload) => {
-          const newMsg = payload.new as ChatMessage
+        (payload: { new: ChatMessage }) => {
+          const newMsg = payload.new
           appendMessage({
             ...newMsg,
             is_own: newMsg.sender_id === (buyerId || sellerId || riderId)

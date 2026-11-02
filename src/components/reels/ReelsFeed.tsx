@@ -319,9 +319,9 @@ export default function ReelsFeed({ initialReels = [], hashtag, sellerId, lang }
                         className="w-8 h-8 rounded-full object-cover border border-white/20"
                       />
                       <span className="font-semibold text-white truncate">{reel.seller_name}</span>
-                      {reel.is_own && (
-                        <CheckCircle className="w-4 h-4 text-brand-400" title={t('yourReel', lang)} />
-                      )}
+{reel.is_own && (
+                          <CheckCircle className="w-4 h-4 text-brand-400" aria-label={t('yourReel', lang)} />
+                        )}
                     </Link>
                     {reel.caption && (
                       <p className="text-white text-sm line-clamp-2 ml-10">{reel.caption}</p>

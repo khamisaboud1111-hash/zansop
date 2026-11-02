@@ -60,8 +60,14 @@ export default function SellerMessagesPage() {
       if (roomError) throw roomError
 
       const senderId = profile?.id ?? ''
+      interface RoomRow {
+          id: string
+          buyer_id: string
+          buyer: { full_name: string; avatar_url: string | null } | null
+        }
+
       const previews: RoomPreview[] = await Promise.all(
-        (roomRows ?? []).map(async (r) => {
+        (roomRows ?? []).map(async (r: RoomRow) => {
           const [lastMsgResult, unreadResult] = await Promise.all([
             supabase
               .from('messages')

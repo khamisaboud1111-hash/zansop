@@ -42,9 +42,9 @@ export function useRecentlyViewed(excludeProductId?: string, limit = 10) {
       .order('viewed_at', { ascending: false })
       .limit(limit + 1) // +1 in case we need to drop the excluded one
 
-    const items = (data ?? [])
-      .map((row: any) => row.product as Product)
-      .filter((p) => p && p.id !== excludeProductId)
+const items = (data ?? [])
+      .map((row: { product: Product }) => row.product)
+      .filter((p: Product | null) => p && p.id !== excludeProductId)
       .slice(0, limit)
 
     setProducts(items)

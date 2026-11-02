@@ -10,6 +10,7 @@ import { useSeller } from '@/hooks/useSeller'
 import { PageLoader, EmptyState } from '@/components/ui'
 import { formatDate } from '@/utils'
 import { cn } from '@/utils'
+import type { Language } from '@/i18n/translations'
 
 interface SellerNotification {
   id: string
@@ -177,7 +178,7 @@ export default function SellerNotificationsPage() {
           <div className="space-y-3">
             {notifications.map((n) => {
               const config = TYPE_CONFIG[n.type] || { label: 'Notification', icon: Bell, color: 'bg-ink-100 text-ink-600' }
-              const lang = 'en' // Could read from store, defaulting to en
+              const lang = 'en' as Language // Could read from store, defaulting to en
               const title = lang === 'sw' ? n.title_sw : n.title_en
               const body = lang === 'sw' ? n.body_sw : n.body_en
               const typeLabel = config.label
