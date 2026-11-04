@@ -1,6 +1,7 @@
-const CANONICAL_ORIGIN = 'https://zanshop-pi.vercel.app'
+const CANONICAL_ORIGIN = 'https://zanshop-khamis.vercel.app'
 const ALLOWED_ORIGINS = new Set([
   CANONICAL_ORIGIN,
+  'https://duka-janja-khamis.vercel.app',
   'https://zanshop.co.tz',
   'http://localhost:3000',
 ])
